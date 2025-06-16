@@ -80,12 +80,6 @@
 				<p>Starte jetzt deine kostenlose Testphase und erlebe, wie KI-Nachhilfe dein Lernen revolutioniert.</p>
 				<div class="cta-actions">
 					<button class="btn primary large">Kostenlos starten</button>
-					<button class="btn secondary large">Demo ansehen</button>
-				</div>
-			</div>
-			<div class="cta-visual">
-				<div class="cta-blob">
-					<img src="/svgs/blopleft.svg" alt="" />
 				</div>
 			</div>
 		</div>
@@ -219,21 +213,18 @@
 		height: 100%;
 		object-fit: contain;
 	}
-	
-	.blob-left {
+		.blob-left {
 		width: 300px;
 		height: 300px;
-		top: 60%;
+		bottom: 0%;
 		left: -50px;
-		transform: rotate(-10deg);
 	}
 	
 	.blob-right {
 		width: 250px;
 		height: 250px;
-		top: 10%;
+		top: 0%;
 		right: -25px;
-		transform: rotate(15deg);
 	}
 	
 	/* Features Section */
