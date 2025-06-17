@@ -13,16 +13,16 @@
 				</p>
 				<p class="hero-description">
 					Individuell, intuitiv und immer da.
-				</p>
-				<div class="actions">
-					<button class="btn primary">Jetzt starten</button>
-					<button class="btn secondary">Mehr erfahren</button>
+				</p>				<div class="actions">
+					<a href="/auth" class="btn primary">Jetzt starten</a>
+					<a href="/auth" class="btn secondary">Mehr erfahren</a>
 				</div>
-			</div>		<div class="hero-illustration">
-			<div class="illustration-container">
-				<img src="/svgs/teach.svg" alt="Teaching illustration" class="teach-illustration" />
 			</div>
-		</div>
+			<div class="hero-illustration">
+				<div class="illustration-container">
+					<img src="/svgs/teach.svg" alt="Teaching illustration" class="teach-illustration" />
+				</div>
+			</div>
 		</div>
 	</div>
 	
@@ -77,9 +77,8 @@
 		<div class="cta-content">
 			<div class="cta-text">
 				<h2>Bereit für bessere Noten?</h2>
-				<p>Starte jetzt deine kostenlose Testphase und erlebe, wie KI-Nachhilfe dein Lernen revolutioniert.</p>
-				<div class="cta-actions">
-					<button class="btn primary large">Kostenlos starten</button>
+				<p>Starte jetzt deine kostenlose Testphase und erlebe, wie KI-Nachhilfe dein Lernen revolutioniert.</p>				<div class="cta-actions">
+					<a href="/auth" class="btn primary large">Kostenlos starten</a>
 				</div>
 			</div>
 		</div>
@@ -113,19 +112,19 @@
 		align-items: center;
 		min-height: 70vh;
 	}
-	
-	.text-content h1 {
+		.text-content h1 {
 		font-size: 3.5rem;
 		font-weight: 800;
 		margin: 0 0 1rem 0;
-		color: #1f2937;
+		color: white;
 		line-height: 1.1;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 	
 	.hero-subtitle {
 		font-size: 1.3rem;
 		margin: 0 0 1rem 0;
-		color: #4b5563;
+		color: rgba(255, 255, 255, 0.9);
 		font-weight: 500;
 		line-height: 1.4;
 	}
@@ -133,7 +132,7 @@
 	.hero-description {
 		font-size: 1.1rem;
 		margin: 0 0 2.5rem 0;
-		color: #6b7280;
+		color: rgba(255, 255, 255, 0.8);
 		font-weight: 400;
 	}
 	
@@ -219,7 +218,6 @@
 		bottom: 0%;
 		left: -50px;
 	}
-	
 	.blob-right {
 		width: 250px;
 		height: 250px;
@@ -352,22 +350,6 @@
 		border-radius: 2rem;
 	}
 	
-	.cta-visual {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	
-	.cta-blob {
-		position: absolute;
-		bottom: -50px;
-		left: -50px;
-		width: 300px;
-		height: 300px;
-		opacity: 0.7;
-		z-index: 1;
-	}
-	
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.hero-content {
@@ -388,7 +370,6 @@
 		.actions {
 			justify-content: center;
 		}
-		
 		.blob-left, .blob-right {
 			display: none;
 		}

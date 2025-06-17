@@ -4,10 +4,17 @@
 
 <nav class="navbar">
 	<div class="nav-container">
-		<a href="/" class="nav-brand">TutorWeb</a>
-		<div class="nav-links">
-			<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
-			<a href="/users" class:active={$page.url.pathname === '/users'}>Users</a>
+		<div class="nav-brand">
+			<div class="logo">
+				<div class="logo-icon">
+					<img src="/svgs/logo.svg" alt="Tutoro Logo" />
+				</div>
+				<span class="brand-name">Tutoro</span>
+			</div>		</div>
+		<div class="nav-actions">
+			<a href="/dashboard" class="nav-btn dashboard">Dashboard</a>
+			<a href="/auth" class="nav-btn login">Login</a>
+			<a href="/auth" class="nav-btn register">Kostenlos testen</a>
 		</div>
 	</div>
 </nav>
@@ -34,60 +41,106 @@
 		top: 0;
 		z-index: 100;
 	}
-	
-	.nav-container {
+		.nav-container {
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 0 2rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		height: 60px;
+		height: 70px;
 	}
 	
 	.nav-brand {
+		display: flex;
+		align-items: center;
+	}
+	
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	
+	.logo-icon {
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+	
+	.logo-icon img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+	
+	.brand-name {
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: #667eea;
-		text-decoration: none;
+		color: #1f2937;
+		margin-left: 0.3rem;
 	}
 	
-	.nav-links {
+	.nav-actions {
 		display: flex;
-		gap: 2rem;
+		align-items: center;
+		gap: 1rem;
 	}
-	
-	.nav-links a {
+		.nav-btn {
+		padding: 0.6rem 1.5rem;
+		border-radius: 1.5rem;
+		font-weight: 600;
+		font-size: 0.9rem;
+		border: none;
+		cursor: pointer;
+		transition: all 0.3s ease;
 		text-decoration: none;
-		color: #666;
-		font-weight: 500;
-		transition: color 0.3s ease;
-		padding: 0.5rem 1rem;
-		border-radius: 4px;
+		display: inline-block;
 	}
 	
-	.nav-links a:hover,
-	.nav-links a.active {
-		color: #667eea;
-		background: rgba(102, 126, 234, 0.1);
+	.nav-btn.login {
+		background: transparent;
+		color: #6366f1;
+		border: 2px solid transparent;
+	}
+	
+	.nav-btn.login:hover {
+		background: #f8fafc;
+		border-color: #e2e8f0;
+	}
+	
+	.nav-btn.register {
+		background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+		color: white;
+		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+	}
+	
+	.nav-btn.register:hover {
+		transform: scale(1.03);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 	}
 	
 	main {
-		min-height: calc(100vh - 60px);
+		min-height: calc(100vh - 70px);
 	}
 	
+	/* Responsive */
 	@media (max-width: 768px) {
 		.nav-container {
 			padding: 0 1rem;
 		}
 		
-		.nav-links {
-			gap: 1rem;
+		.brand-name {
+			font-size: 1.3rem;
 		}
 		
-		.nav-links a {
-			padding: 0.5rem;
-			font-size: 0.9rem;
+		.nav-btn {
+			padding: 0.5rem 1rem;
+			font-size: 0.8rem;
 		}
 	}
 </style>
