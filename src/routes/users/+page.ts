@@ -1,10 +1,6 @@
-import type { PageLoad } from '@sveltejs/kit';
-
-export const load: PageLoad = async ({ fetch }) => {
-	const response = await fetch('/api/users');
-	const users = await response.json();
-	
-	return {
-		users
-	};
+// This route is deprecated - user data is now managed through Firebase
+export const load = async () => {
+  return {
+    users: [],
+  };
 };

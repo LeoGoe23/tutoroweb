@@ -32,7 +32,22 @@ if (browser) {
     if (firebaseUser) {
       // Load user profile from Firestore
       try {
-        const profile = await userProfileService.getUserProfile(firebaseUser.uid);
+        let profile = await userProfileService.getUserProfile(firebaseUser.uid);
+
+        // If profile doesn't exist, create it (for existing users or edge cases)
+        if (!profile) {
+          const displayName = firebaseUser.displayName || "";
+          const nameParts = displayName.split(" ");
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          profile = await userProfileService.createUserProfile(firebaseUser, {
+            firstName,
+            lastName,
+            displayName,
+          });
+        }
+
         userProfile.set(profile);
       } catch (error) {
         console.error("Error loading user profile:", error);
@@ -103,8 +118,7 @@ export const authStore = {
       authError.set(error.message);
       throw error;
     }
-  },
-  // Sign in with Google
+  }, // Sign in with Google
   signInWithGoogle: async () => {
     try {
       authError.set("");
@@ -113,7 +127,17 @@ export const authStore = {
 
       // Create or update user profile in Firestore for Google users
       if (result.user) {
-        await userProfileService.createUserProfile(result.user);
+        // Extract name parts from Google profile
+        const displayName = result.user.displayName || "";
+        const nameParts = displayName.split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        await userProfileService.createUserProfile(result.user, {
+          firstName,
+          lastName,
+          displayName,
+        });
       }
 
       return result;

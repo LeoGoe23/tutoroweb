@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { user, loading } from '$lib/auth';
-  import { goto } from '$app/navigation';
-  
+  import { user, loading } from "$lib/auth";
+  import { goto } from "$app/navigation";
+
   // Redirect if not authenticated
   $: if (!$loading && !$user) {
-    goto('/auth');
+    goto("/auth");
   }
 </script>
 
@@ -30,7 +30,7 @@
     min-height: 50vh;
     gap: 1rem;
   }
-  
+
   .loading-spinner {
     width: 40px;
     height: 40px;
@@ -39,12 +39,16 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
-  
+
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
-  
+
   .auth-required {
     display: flex;
     align-items: center;
