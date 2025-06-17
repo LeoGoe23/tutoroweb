@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { user, loading, authStore } from "$lib/auth";
+  import { user, userProfile, loading, authStore } from "$lib/auth";
 
   // Handle logout
   async function handleLogout() {
@@ -38,7 +38,7 @@
         <a href="/settings" class="nav-btn settings">Settings</a>
         <div class="user-info">
           <span class="user-email">
-            {$user.displayName || $user.email}
+            {$userProfile?.firstName || $user?.displayName || $user?.email}
           </span>
           <button on:click={handleLogout} class="nav-btn logout">Logout</button>
         </div>
