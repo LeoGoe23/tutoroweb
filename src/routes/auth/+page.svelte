@@ -1,66 +1,92 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { goto } from '$app/navigation';
-  import { user, loading, authError, authStore } from '$lib/auth';
-  
+  import { goto } from "$app/navigation";
+  import { user, loading, authError, authStore } from "$lib/auth";
+
   // Form state
   let isLoginTab = true;
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
+  let email = "";
+  let password = "";
+  let confirmPassword = "";
+  let firstName = "";
+  let lastName = "";
   let isSubmitting = false;
-  
+
   // Redirect if already authenticated
   $: if ($user && !$loading) {
-    goto('/dashboard');
+    goto("/dashboard");
   }
-  
+
   // Handle form submission
   async function handleSubmit() {
     if (isSubmitting) return;
-    
+
     authStore.clearError();
-    
+
     // Validation
     if (!email || !password) {
-      authError.set('Please fill in all fields');
+      authError.set("Please fill in all fields");
       return;
     }
-    
+
+    if (!isLoginTab && (!firstName || !lastName)) {
+      authError.set("Please fill in your first and last name");
+      return;
+    }
+
     if (!isLoginTab && password !== confirmPassword) {
-      authError.set('Passwords do not match');
+      authError.set("Passwords do not match");
       return;
     }
-    
+
     if (!isLoginTab && password.length < 6) {
-      authError.set('Password must be at least 6 characters');
+      authError.set("Password must be at least 6 characters");
       return;
     }
-    
+
     isSubmitting = true;
-    
+
     try {
       if (isLoginTab) {
         await authStore.signIn(email, password);
       } else {
-        await authStore.signUp(email, password);
+        const displayName = `${firstName} ${lastName}`;
+        await authStore.signUp(email, password, displayName, firstName, lastName);
       }
-      goto('/dashboard');
+      goto("/dashboard");
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       // Error is handled by the auth store
     } finally {
       isSubmitting = false;
     }
   }
-  
   function switchTab(loginTab: boolean) {
     isLoginTab = loginTab;
     authStore.clearError();
     // Reset form
-    email = '';
-    password = '';
-    confirmPassword = '';
+    email = "";
+    password = "";
+    confirmPassword = "";
+    firstName = "";
+    lastName = "";
+  }
+
+  // Handle Google Sign-In
+  async function handleGoogleSignIn() {
+    if (isSubmitting) return;
+
+    isSubmitting = true;
+    authStore.clearError();
+
+    try {
+      await authStore.signInWithGoogle();
+      goto("/dashboard");
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+    } finally {
+      isSubmitting = false;
+    }
   }
   onMount(() => {
     // Clean up - no longer needed as we use Svelte reactivity
@@ -79,21 +105,10 @@
         <h1>Tutoro</h1>
       </div>
       <p class="auth-subtitle">Willkommen zurück! Melde dich an oder erstelle ein neues Konto.</p>
-    </div>    <div class="auth-tabs">
-      <button 
-        class="tab-btn" 
-        class:active={isLoginTab}
-        on:click={() => switchTab(true)}
-      >
-        Anmelden
-      </button>
-      <button 
-        class="tab-btn" 
-        class:active={!isLoginTab}
-        on:click={() => switchTab(false)}
-      >
-        Registrieren
-      </button>
+    </div>
+    <div class="auth-tabs">
+      <button class="tab-btn" class:active={isLoginTab} on:click={() => switchTab(true)}> Anmelden </button>
+      <button class="tab-btn" class:active={!isLoginTab} on:click={() => switchTab(false)}> Registrieren </button>
     </div>
 
     {#if $authError}
@@ -103,9 +118,7 @@
     {/if}
 
     {#if $loading}
-      <div class="loading-message">
-        Loading...
-      </div>
+      <div class="loading-message">Loading...</div>
     {/if}
 
     <!-- Login Form -->
@@ -113,22 +126,22 @@
       <form class="auth-form" on:submit|preventDefault={handleSubmit}>
         <div class="form-group">
           <label for="email">E-Mail</label>
-          <input 
-            type="email" 
-            id="email" 
-            bind:value={email} 
-            required 
-            placeholder="deine@email.de" 
+          <input
+            type="email"
+            id="email"
+            bind:value={email}
+            required
+            placeholder="deine@email.de"
             disabled={isSubmitting}
           />
         </div>
         <div class="form-group">
           <label for="password">Passwort</label>
-          <input 
-            type="password" 
-            id="password" 
-            bind:value={password} 
-            required 
+          <input
+            type="password"
+            id="password"
+            bind:value={password}
+            required
             placeholder="••••••••"
             disabled={isSubmitting}
           />
@@ -141,41 +154,65 @@
           <a href="/forgot-password" class="forgot-link">Passwort vergessen?</a>
         </div>
         <button type="submit" class="auth-btn primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Anmelden...' : 'Anmelden'}
+          {isSubmitting ? "Anmelden..." : "Anmelden"}
         </button>
       </form>
     {:else}
       <!-- Register Form -->
       <form class="auth-form" on:submit|preventDefault={handleSubmit}>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-firstname">Vorname</label>
+            <input
+              type="text"
+              id="reg-firstname"
+              bind:value={firstName}
+              required
+              placeholder="Max"
+              disabled={isSubmitting}
+            />
+          </div>
+          <div class="form-group">
+            <label for="reg-lastname">Nachname</label>
+            <input
+              type="text"
+              id="reg-lastname"
+              bind:value={lastName}
+              required
+              placeholder="Mustermann"
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
         <div class="form-group">
           <label for="reg-email">E-Mail</label>
-          <input 
-            type="email" 
-            id="reg-email" 
-            bind:value={email} 
-            required 
+          <input
+            type="email"
+            id="reg-email"
+            bind:value={email}
+            required
             placeholder="deine@email.de"
             disabled={isSubmitting}
           />
         </div>
         <div class="form-group">
           <label for="reg-password">Passwort</label>
-          <input 
-            type="password" 
-            id="reg-password" 
-            bind:value={password} 
-            required 
+          <input
+            type="password"
+            id="reg-password"
+            bind:value={password}
+            required
             placeholder="••••••••"
             disabled={isSubmitting}
           />
         </div>
         <div class="form-group">
           <label for="reg-confirm">Passwort bestätigen</label>
-          <input 
-            type="password" 
-            id="reg-confirm" 
-            bind:value={confirmPassword} 
-            required 
+          <input
+            type="password"
+            id="reg-confirm"
+            bind:value={confirmPassword}
+            required
             placeholder="••••••••"
             disabled={isSubmitting}
           />
@@ -187,7 +224,7 @@
           </label>
         </div>
         <button type="submit" class="auth-btn primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Konto wird erstellt...' : 'Kostenloses Konto erstellen'}
+          {isSubmitting ? "Konto wird erstellt..." : "Kostenloses Konto erstellen"}
         </button>
       </form>
     {/if}
@@ -195,9 +232,8 @@
     <div class="auth-divider">
       <span>oder</span>
     </div>
-
     <div class="social-auth">
-      <button class="social-btn google">
+      <button class="social-btn google" on:click={handleGoogleSignIn} disabled={isSubmitting}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -212,7 +248,7 @@
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-        Mit Google anmelden
+        {isSubmitting ? "Anmelden..." : "Mit Google anmelden"}
       </button>
     </div>
   </div>
@@ -311,7 +347,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transform: scale(1.02);
   }
-  
+
   .error-message {
     background: #fee2e2;
     border: 1px solid #fecaca;
@@ -322,7 +358,7 @@
     font-size: 0.9rem;
     text-align: center;
   }
-  
+
   .loading-message {
     background: #eff6ff;
     border: 1px solid #dbeafe;
@@ -333,15 +369,27 @@
     font-size: 0.9rem;
     text-align: center;
   }
-  
+
   .auth-form {
     display: block;
-    opacity: 1;    transform: translateX(0);
+    opacity: 1;
+    transform: translateX(0);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .form-group {
     margin-bottom: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
   }
 
   .form-group label {
@@ -418,13 +466,13 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
   }
-  
+
   .auth-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none !important;
   }
-  
+
   .auth-btn:disabled:hover {
     transform: none;
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
@@ -500,6 +548,15 @@
       flex-direction: column;
       gap: 0.75rem;
       align-items: flex-start;
+    }
+
+    .form-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-row .form-group {
+      margin-bottom: 0.5rem;
     }
   }
 </style>

@@ -1,35 +1,43 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { user } from '$lib/auth';
-  
+  import { onMount } from "svelte";
+  import { user, userProfile } from "$lib/auth";
+  import { userProfileService } from "$lib/userProfile";
+
   let userName = "Max Mustermann";
   let userStats = {
     totalSessions: 24,
     weeklyProgress: 85,
     streakDays: 7,
-    completedLessons: 156
+    completedLessons: 156,
   };
-    // Update user name when user is loaded
-  $: if ($user) {
-    userName = $user.email?.split('@')[0] || 'User';
+
+  // Update user name and stats when user profile is loaded
+  $: if ($userProfile) {
+    userName = $userProfile.displayName || $userProfile.firstName + " " + $userProfile.lastName || "User";
+    if ($userProfile.stats) {
+      userStats = { ...userStats, ...$userProfile.stats };
+    }
+  } else if ($user) {
+    // Fallback if profile hasn't loaded yet
+    userName = $user.displayName || $user.email?.split("@")[0] || "User";
   }
 
   let recentActivities = [
     { id: 1, subject: "Mathematik", topic: "Quadratische Gleichungen", time: "vor 2 Stunden", progress: 95 },
     { id: 2, subject: "Physik", topic: "Mechanik", time: "vor 1 Tag", progress: 78 },
     { id: 3, subject: "Chemie", topic: "Periodensystem", time: "vor 2 Tagen", progress: 89 },
-    { id: 4, subject: "Deutsch", topic: "Gedichtanalyse", time: "vor 3 Tagen", progress: 92 }
+    { id: 4, subject: "Deutsch", topic: "Gedichtanalyse", time: "vor 3 Tagen", progress: 92 },
   ];
 
   let upcomingLessons = [
     { id: 1, subject: "Mathematik", topic: "Logarithmus", time: "14:00", difficulty: "Mittel" },
     { id: 2, subject: "Englisch", topic: "Past Perfect", time: "16:30", difficulty: "Leicht" },
-    { id: 3, subject: "Geschichte", topic: "Weimarer Republik", time: "Morgen 10:00", difficulty: "Schwer" }
+    { id: 3, subject: "Geschichte", topic: "Weimarer Republik", time: "Morgen 10:00", difficulty: "Schwer" },
   ];
 
   onMount(() => {
     // Simulate loading user data
-    console.log('Dashboard loaded for user:', userName);
+    console.log("Dashboard loaded for user:", userName);
   });
 </script>
 
@@ -55,7 +63,7 @@
     <div class="stat-card">
       <div class="stat-icon sessions">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.16.21 2.76.21 3.91 0C20.16 27 24 22.55 24 17V7l-10-5z"/>
+          <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.16.21 2.76.21 3.91 0C20.16 27 24 22.55 24 17V7l-10-5z" />
         </svg>
       </div>
       <div class="stat-content">
@@ -67,8 +75,8 @@
     <div class="stat-card">
       <div class="stat-icon progress">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22,4 12,14.01 9,11.01"/>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22,4 12,14.01 9,11.01" />
         </svg>
       </div>
       <div class="stat-content">
@@ -80,7 +88,9 @@
     <div class="stat-card">
       <div class="stat-icon streak">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          <path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+          />
         </svg>
       </div>
       <div class="stat-content">
@@ -92,11 +102,11 @@
     <div class="stat-card">
       <div class="stat-icon lessons">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14,2 14,8 20,8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10,9 9,9 8,9"/>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14,2 14,8 20,8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10,9 9,9 8,9" />
         </svg>
       </div>
       <div class="stat-content">
@@ -165,28 +175,28 @@
       <div class="actions-grid">
         <button class="action-btn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14,2 14,8 20,8"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
           </svg>
           <span>Neue Aufgabe</span>
         </button>
         <button class="action-btn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22,4 12,14.01 9,11.01"/>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22,4 12,14.01 9,11.01" />
           </svg>
           <span>Quiz starten</span>
         </button>
         <button class="action-btn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
           </svg>
           <span>Fortschritt</span>
         </button>
         <button class="action-btn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
           <span>KI-Tutor</span>
         </button>
@@ -299,10 +309,18 @@
     color: white;
   }
 
-  .stat-icon.sessions { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
-  .stat-icon.progress { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
-  .stat-icon.streak { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-  .stat-icon.lessons { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+  .stat-icon.sessions {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  }
+  .stat-icon.progress {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  }
+  .stat-icon.streak {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+  .stat-icon.lessons {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  }
 
   .stat-content h3 {
     font-size: 2rem;
@@ -355,7 +373,8 @@
     text-decoration: underline;
   }
 
-  .activities-list, .lessons-list {
+  .activities-list,
+  .lessons-list {
     padding: 1.5rem;
   }
 
@@ -385,10 +404,18 @@
     color: white;
   }
 
-  .subject-badge.mathematik { background: #3b82f6; }
-  .subject-badge.physik { background: #10b981; }
-  .subject-badge.chemie { background: #f59e0b; }
-  .subject-badge.deutsch { background: #8b5cf6; }
+  .subject-badge.mathematik {
+    background: #3b82f6;
+  }
+  .subject-badge.physik {
+    background: #10b981;
+  }
+  .subject-badge.chemie {
+    background: #f59e0b;
+  }
+  .subject-badge.deutsch {
+    background: #8b5cf6;
+  }
 
   .activity-details h4 {
     margin: 0 0 0.25rem 0;
@@ -460,9 +487,18 @@
     font-weight: 600;
   }
 
-  .difficulty.leicht { background: #dcfce7; color: #166534; }
-  .difficulty.mittel { background: #fef3c7; color: #92400e; }
-  .difficulty.schwer { background: #fee2e2; color: #991b1b; }
+  .difficulty.leicht {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .difficulty.mittel {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .difficulty.schwer {
+    background: #fee2e2;
+    color: #991b1b;
+  }
 
   .quick-actions {
     grid-column: 1 / -1;
@@ -510,7 +546,7 @@
     .content-grid {
       grid-template-columns: 1fr;
     }
-    
+
     .quick-actions {
       grid-column: 1;
     }

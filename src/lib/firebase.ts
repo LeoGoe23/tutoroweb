@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, type Auth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 import { browser } from "$app/environment";
 import {
   PUBLIC_FIREBASE_API_KEY,
@@ -28,6 +29,14 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Auth and get a reference to the service
 export const auth: Auth = getAuth(app);
+
+// Initialize Firestore
+export const db: Firestore = getFirestore(app);
+
+// Initialize Google Auth Provider
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
 
 // Only enable auth persistence in the browser
 if (browser) {
