@@ -1,3 +1,5 @@
+import type { User as FirebaseUser } from 'firebase/auth';
+
 export interface User {
 	id: number;
 	name: string;
@@ -7,4 +9,12 @@ export interface User {
 export interface CreateUserRequest {
 	name: string;
 	email: string;
+}
+
+// Firebase auth types
+export type AuthUser = FirebaseUser;
+
+export interface AuthError {
+	code: string;
+	message: string;
 }

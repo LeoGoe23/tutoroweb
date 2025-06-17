@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { user } from '$lib/auth';
   
   let userName = "Max Mustermann";
   let userStats = {
@@ -8,6 +9,10 @@
     streakDays: 7,
     completedLessons: 156
   };
+    // Update user name when user is loaded
+  $: if ($user) {
+    userName = $user.email?.split('@')[0] || 'User';
+  }
 
   let recentActivities = [
     { id: 1, subject: "Mathematik", topic: "Quadratische Gleichungen", time: "vor 2 Stunden", progress: 95 },

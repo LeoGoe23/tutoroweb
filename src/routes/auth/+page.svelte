@@ -1,91 +1,69 @@
 <script lang="ts">
   import { onMount } from "svelte";
-
-  onMount(() => {
-    const tabBtns = document.querySelectorAll(".tab-btn");
-    const loginForm = document.getElementById("login-form");
-    const registerForm = document.getElementById("register-form");
-    const authCard = document.querySelector(".auth-card");
-
-    if (!loginForm || !registerForm || !authCard) return;
-
-    // Function to handle form transitions between login and register
-    function switchToForm(isLoginTab: boolean): void {
+  import { goto } from '$app/navigation';
+  import { user, loading, authError, authStore } from '$lib/auth';
+  
+  // Form state
+  let isLoginTab = true;
+  let email = '';
+  let password = '';
+  let confirmPassword = '';
+  let isSubmitting = false;
+  
+  // Redirect if already authenticated
+  $: if ($user && !$loading) {
+    goto('/dashboard');
+  }
+  
+  // Handle form submission
+  async function handleSubmit() {
+    if (isSubmitting) return;
+    
+    authStore.clearError();
+    
+    // Validation
+    if (!email || !password) {
+      authError.set('Please fill in all fields');
+      return;
+    }
+    
+    if (!isLoginTab && password !== confirmPassword) {
+      authError.set('Passwords do not match');
+      return;
+    }
+    
+    if (!isLoginTab && password.length < 6) {
+      authError.set('Password must be at least 6 characters');
+      return;
+    }
+    
+    isSubmitting = true;
+    
+    try {
       if (isLoginTab) {
-        // Switch to login
-        if (registerForm) {
-          registerForm.style.opacity = "0";
-        }
-
-        setTimeout(() => {
-          if (registerForm) registerForm.classList.add("hidden");
-          if (loginForm) {
-            loginForm.classList.remove("hidden");
-            loginForm.style.opacity = "0";
-            loginForm.style.transform = "translateX(-20px)";
-
-            // Trigger reflow
-            loginForm.offsetHeight;
-
-            loginForm.style.opacity = "1";
-            loginForm.style.transform = "translateX(0)";
-          }
-        }, 150);
+        await authStore.signIn(email, password);
       } else {
-        // Switch to register
-        if (loginForm) {
-          loginForm.style.opacity = "0";
-          loginForm.style.transform = "translateX(-20px)";
-        }
-
-        setTimeout(() => {
-          if (loginForm) loginForm.classList.add("hidden");
-          if (registerForm) {
-            registerForm.classList.remove("hidden");
-            registerForm.style.opacity = "0";
-            registerForm.style.transform = "translateX(20px)";
-
-            // Trigger reflow
-            registerForm.offsetHeight;
-
-            registerForm.style.opacity = "1";
-            registerForm.style.transform = "translateX(0)";
-          }
-        }, 150);
+        await authStore.signUp(email, password);
       }
-    }    tabBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        // Remove active class from all tabs
-        tabBtns.forEach((tab) => tab.classList.remove("active"));
-        // Add active class to clicked tab
-        btn.classList.add("active");
-
-        // Animate form switch
-        const tabType = btn.getAttribute("data-tab");
-        switchToForm(tabType === "login");
-      });
-    });
-
-    // Handle form submissions
-    if (loginForm) {
-      loginForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        // Simulate login process
-        console.log("Login form submitted");
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
-      });
+      goto('/dashboard');
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      // Error is handled by the auth store
+    } finally {
+      isSubmitting = false;
     }
-
-    if (registerForm) {
-      registerForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        // Simulate registration process
-        console.log("Register form submitted");
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
-      });
-    }
+  }
+  
+  function switchTab(loginTab: boolean) {
+    isLoginTab = loginTab;
+    authStore.clearError();
+    // Reset form
+    email = '';
+    password = '';
+    confirmPassword = '';
+  }
+  onMount(() => {
+    // Clean up - no longer needed as we use Svelte reactivity
   });
 </script>
 
@@ -101,64 +79,118 @@
         <h1>Tutoro</h1>
       </div>
       <p class="auth-subtitle">Willkommen zurück! Melde dich an oder erstelle ein neues Konto.</p>
+    </div>    <div class="auth-tabs">
+      <button 
+        class="tab-btn" 
+        class:active={isLoginTab}
+        on:click={() => switchTab(true)}
+      >
+        Anmelden
+      </button>
+      <button 
+        class="tab-btn" 
+        class:active={!isLoginTab}
+        on:click={() => switchTab(false)}
+      >
+        Registrieren
+      </button>
     </div>
 
-    <div class="auth-tabs">
-      <button class="tab-btn active" data-tab="login">Anmelden</button>
-      <button class="tab-btn" data-tab="register">Registrieren</button>
-    </div>
+    {#if $authError}
+      <div class="error-message">
+        {$authError}
+      </div>
+    {/if}
+
+    {#if $loading}
+      <div class="loading-message">
+        Loading...
+      </div>
+    {/if}
 
     <!-- Login Form -->
-    <form class="auth-form" id="login-form">
-      <div class="form-group">
-        <label for="email">E-Mail</label>
-        <input type="email" id="email" name="email" required placeholder="deine@email.de" />
-      </div>
-      <div class="form-group">
-        <label for="password">Passwort</label>
-        <input type="password" id="password" name="password" required placeholder="••••••••" />
-      </div>
-      <div class="form-options">
-        <label class="checkbox">
-          <input type="checkbox" />
-          <span>Angemeldet bleiben</span>
-        </label>
-        <a href="/forgot-password" class="forgot-link">Passwort vergessen?</a>
-      </div>
-      <button type="submit" class="auth-btn primary">Anmelden</button>
-    </form>
-    <!-- Register Form -->
-    <form class="auth-form hidden" id="register-form">
-      <div class="form-row">
+    {#if isLoginTab}
+      <form class="auth-form" on:submit|preventDefault={handleSubmit}>
         <div class="form-group">
-          <label for="reg-firstname">Vorname</label>
-          <input type="text" id="reg-firstname" name="firstname" required placeholder="Max" />
+          <label for="email">E-Mail</label>
+          <input 
+            type="email" 
+            id="email" 
+            bind:value={email} 
+            required 
+            placeholder="deine@email.de" 
+            disabled={isSubmitting}
+          />
         </div>
         <div class="form-group">
-          <label for="reg-lastname">Nachname</label>
-          <input type="text" id="reg-lastname" name="lastname" required placeholder="Mustermann" />
+          <label for="password">Passwort</label>
+          <input 
+            type="password" 
+            id="password" 
+            bind:value={password} 
+            required 
+            placeholder="••••••••"
+            disabled={isSubmitting}
+          />
         </div>
-      </div>
-      <div class="form-group">
-        <label for="reg-email">E-Mail</label>
-        <input type="email" id="reg-email" name="email" required placeholder="deine@email.de" />
-      </div>
-      <div class="form-group">
-        <label for="reg-password">Passwort</label>
-        <input type="password" id="reg-password" name="password" required placeholder="••••••••" />
-      </div>
-      <div class="form-group">
-        <label for="reg-confirm">Passwort bestätigen</label>
-        <input type="password" id="reg-confirm" name="confirm" required placeholder="••••••••" />
-      </div>
-      <div class="form-options">
-        <label class="checkbox">
-          <input type="checkbox" required />
-          <span>Ich akzeptiere die <a href="/terms">AGB</a> und <a href="/privacy">Datenschutzrichtlinien</a></span>
-        </label>
-      </div>
-      <button type="submit" class="auth-btn primary">Kostenloses Konto erstellen</button>
-    </form>
+        <div class="form-options">
+          <label class="checkbox">
+            <input type="checkbox" />
+            <span>Angemeldet bleiben</span>
+          </label>
+          <a href="/forgot-password" class="forgot-link">Passwort vergessen?</a>
+        </div>
+        <button type="submit" class="auth-btn primary" disabled={isSubmitting}>
+          {isSubmitting ? 'Anmelden...' : 'Anmelden'}
+        </button>
+      </form>
+    {:else}
+      <!-- Register Form -->
+      <form class="auth-form" on:submit|preventDefault={handleSubmit}>
+        <div class="form-group">
+          <label for="reg-email">E-Mail</label>
+          <input 
+            type="email" 
+            id="reg-email" 
+            bind:value={email} 
+            required 
+            placeholder="deine@email.de"
+            disabled={isSubmitting}
+          />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Passwort</label>
+          <input 
+            type="password" 
+            id="reg-password" 
+            bind:value={password} 
+            required 
+            placeholder="••••••••"
+            disabled={isSubmitting}
+          />
+        </div>
+        <div class="form-group">
+          <label for="reg-confirm">Passwort bestätigen</label>
+          <input 
+            type="password" 
+            id="reg-confirm" 
+            bind:value={confirmPassword} 
+            required 
+            placeholder="••••••••"
+            disabled={isSubmitting}
+          />
+        </div>
+        <div class="form-options">
+          <label class="checkbox">
+            <input type="checkbox" required />
+            <span>Ich akzeptiere die <a href="/terms">AGB</a> und <a href="/privacy">Datenschutzrichtlinien</a></span>
+          </label>
+        </div>
+        <button type="submit" class="auth-btn primary" disabled={isSubmitting}>
+          {isSubmitting ? 'Konto wird erstellt...' : 'Kostenloses Konto erstellen'}
+        </button>
+      </form>
+    {/if}
 
     <div class="auth-divider">
       <span>oder</span>
@@ -273,32 +305,39 @@
     color: #4b5563;
     transform: scale(1.02);
   }
-
   .tab-btn.active {
     background: white;
     color: #6366f1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transform: scale(1.02);
   }
+  
+  .error-message {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .loading-message {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #2563eb;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
   .auth-form {
     display: block;
-    opacity: 1;
-    transform: translateX(0);
+    opacity: 1;    transform: translateX(0);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .auth-form.hidden {
-    display: none;
-  }
-
-  .form-row {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-row .form-group {
-    flex: 1;
-    margin-bottom: 0;
   }
 
   .form-group {
@@ -375,10 +414,20 @@
     color: white;
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   }
-
   .auth-btn.primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+  
+  .auth-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  .auth-btn:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   }
   .auth-divider {
     text-align: center;
@@ -451,15 +500,6 @@
       flex-direction: column;
       gap: 0.75rem;
       align-items: flex-start;
-    }
-
-    .form-row {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-row .form-group {
-      margin-bottom: 0.5rem;
     }
   }
 </style>

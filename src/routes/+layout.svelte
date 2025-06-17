@@ -1,5 +1,23 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { user, loading, authStore } from '$lib/auth';
+	
+	// Handle logout
+	async function handleLogout() {
+		try {
+			await authStore.signOut();
+			goto('/');
+		} catch (error) {
+			console.error('Logout error:', error);
+		}
+	}
+	
+	// Redirect to auth if accessing protected route while not authenticated
+	$: if (!$loading && $page.data.isProtectedRoute && !$user) {
+		goto('/auth');
+	}
 </script>
 
 <nav class="navbar">
@@ -10,11 +28,19 @@
 					<img src="/svgs/logo.svg" alt="Tutoro Logo" />
 				</div>
 				<span class="brand-name">Tutoro</span>
-			</div>		</div>
-		<div class="nav-actions">
-			<a href="/dashboard" class="nav-btn dashboard">Dashboard</a>
-			<a href="/auth" class="nav-btn login">Login</a>
-			<a href="/auth" class="nav-btn register">Kostenlos testen</a>
+			</div>		</div>		<div class="nav-actions">
+			{#if $loading}
+				<div class="nav-btn loading">Loading...</div>
+			{:else if $user}
+				<a href="/dashboard" class="nav-btn dashboard">Dashboard</a>
+				<div class="user-info">
+					<span class="user-email">{$user.email}</span>
+					<button on:click={handleLogout} class="nav-btn logout">Logout</button>
+				</div>
+			{:else}
+				<a href="/auth" class="nav-btn login">Login</a>
+				<a href="/auth" class="nav-btn register">Kostenlos testen</a>
+			{/if}
 		</div>
 	</div>
 </nav>
@@ -118,10 +144,47 @@
 		color: white;
 		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 	}
-	
-	.nav-btn.register:hover {
+		.nav-btn.register:hover {
 		transform: scale(1.03);
 		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+	}
+	
+	.nav-btn.dashboard {
+		background: #10b981;
+		color: white;
+		border: 2px solid transparent;
+	}
+	
+	.nav-btn.dashboard:hover {
+		background: #059669;
+	}
+	
+	.nav-btn.logout {
+		background: #ef4444;
+		color: white;
+		border: 2px solid transparent;
+	}
+	
+	.nav-btn.logout:hover {
+		background: #dc2626;
+	}
+	
+	.nav-btn.loading {
+		background: #6b7280;
+		color: white;
+		cursor: default;
+	}
+	
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	
+	.user-email {
+		font-size: 0.9rem;
+		color: #6b7280;
+		font-weight: 500;
 	}
 	
 	main {
