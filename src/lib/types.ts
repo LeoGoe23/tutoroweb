@@ -80,3 +80,20 @@ export type KursFach =
   | "Psychologie"
   | "Pädagogik"
   | "Sonstiges";
+
+export type SchulArt =
+  | "Grundschule"
+  | "Hauptschule"
+  | "Realschule"
+  | "Gesamtschule"
+  | "Gymnasium"
+  | "Berufsschule"
+  | "Berufsoberschule"
+  | "Fachoberschule"
+  | "Fachhochschule"
+  | "Universität"
+  | "Privatschule"
+  | "Waldorfschule"
+  | "Montessori-Schule"
+  | "Internationale Schule"
+  | "Sonstiges";

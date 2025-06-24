@@ -1,7 +1,7 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, type DocumentReference } from "firebase/firestore";
 import { db } from "./firebase";
 import type { User } from "firebase/auth";
-import type { UserSubscription, Jahrgangsstufe, Bundesland, KursFach } from "./types";
+import type { UserSubscription, Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "./types";
 
 export interface UserProfile {
   uid: string;
@@ -12,15 +12,15 @@ export interface UserProfile {
   photoURL?: string;
   createdAt: any;
   updatedAt: any;
-  
+
   // Profile completion status
   profileCompleted: boolean;
-  
   // School information
   jahrgangsstufe?: Jahrgangsstufe;
   bundesland?: Bundesland;
+  schulArt?: SchulArt;
   kursFach?: KursFach[];
-  
+
   subscription?: UserSubscription;
   preferences?: {
     language: string;
@@ -54,7 +54,8 @@ export const userProfileService = {
     if (!userDoc.exists()) {
       const { displayName, email, photoURL } = user;
       const firstName = additionalData.firstName || displayName?.split(" ")[0] || "";
-      const lastName = additionalData.lastName || displayName?.split(" ").slice(1).join(" ") || "";      const userData: UserProfile = {
+      const lastName = additionalData.lastName || displayName?.split(" ").slice(1).join(" ") || "";
+      const userData: UserProfile = {
         uid: user.uid,
         email: email || "",
         displayName: displayName || `${firstName} ${lastName}`.trim(),
@@ -65,8 +66,8 @@ export const userProfileService = {
         updatedAt: serverTimestamp(),
         profileCompleted: false,
         subscription: {
-          tier: 'free',
-          status: 'active',
+          tier: "free",
+          status: "active",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -178,13 +179,13 @@ export const userProfileService = {
       throw error;
     }
   },
-  
   // Complete user profile with school information
   completeUserProfile: async (
-    uid: string, 
+    uid: string,
     schoolInfo: {
       jahrgangsstufe: Jahrgangsstufe;
       bundesland: Bundesland;
+      schulArt: SchulArt;
       kursFach: KursFach[];
     }
   ) => {
@@ -193,11 +194,12 @@ export const userProfileService = {
       await updateDoc(userRef, {
         jahrgangsstufe: schoolInfo.jahrgangsstufe,
         bundesland: schoolInfo.bundesland,
+        schulArt: schoolInfo.schulArt,
         kursFach: schoolInfo.kursFach,
         profileCompleted: true,
         updatedAt: serverTimestamp(),
       });
-      
+
       // Return the updated profile
       return await userProfileService.getUserProfile(uid);
     } catch (error) {

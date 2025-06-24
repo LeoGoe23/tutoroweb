@@ -2,7 +2,7 @@
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
   import { goto } from "$app/navigation";
-  import type { Jahrgangsstufe, Bundesland, KursFach } from "$lib/types";
+  import type { Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "$lib/types";
 
   let firstName = "";
   let lastName = "";
@@ -11,31 +11,12 @@
   let notifications = true;
   let jahrgangsstufe: Jahrgangsstufe | "" = "";
   let bundesland: Bundesland | "" = "";
+  let schulArt: SchulArt | "" = "";
   let kursFach: KursFach[] = [];
   let isSubmitting = false;
-  let successMessage = "";  
+  let successMessage = "";
   let errorMessage = "";
-  
-  // Bundesland flag mapping
-  const bundeslandFlags = {
-    "Baden-Württemberg": "🏰",
-    "Bayern": "🥨", 
-    "Berlin": "🐻",
-    "Brandenburg": "🌲",
-    "Bremen": "⚓",
-    "Hamburg": "🚢",
-    "Hessen": "🍎",
-    "Mecklenburg-Vorpommern": "🏖️",
-    "Niedersachsen": "🐴",
-    "Nordrhein-Westfalen": "⚡",
-    "Rheinland-Pfalz": "🍷",
-    "Saarland": "⚒️",
-    "Sachsen": "🎭",
-    "Sachsen-Anhalt": "🏛️",
-    "Schleswig-Holstein": "🌊",
-    "Thüringen": "🌿"
-  };
-  
+
   // Load current profile data
   $: if ($userProfile) {
     firstName = $userProfile.firstName || "";
@@ -45,6 +26,7 @@
     notifications = $userProfile.preferences?.notifications ?? true;
     jahrgangsstufe = $userProfile.jahrgangsstufe || "";
     bundesland = $userProfile.bundesland || "";
+    schulArt = $userProfile.schulArt || "";
     kursFach = $userProfile.kursFach || [];
   }
   async function handleUpdateProfile() {
@@ -120,19 +102,63 @@
       </div>
       <div class="section">
         <h2>Schulinformationen</h2>
-
         <div class="info-group">
           <label>Jahrgangsstufe</label>
           <div class="info-value">
             {jahrgangsstufe || "Nicht angegeben"}
           </div>
-        </div>        <div class="info-group">
+        </div>
+
+        <div class="info-group">
+          <label>Art der Schule</label>
+          <div class="info-value">
+            {schulArt || "Nicht angegeben"}
+          </div>
+        </div>
+        <div class="info-group">
           <label>Bundesland</label>
           <div class="info-value bundesland-display">
             {#if bundesland}
               <div class="bundesland-card">
                 <div class="bundesland-flag">
-                  {bundeslandFlags[bundesland] || "🇩🇪"}
+                  {#if bundesland === "Baden-Württemberg"}
+                    <img src="/countries/german_counties/baden-wuerttemberg.svg" alt="Baden-Württemberg Flagge" />
+                  {:else if bundesland === "Bayern"}
+                    <img src="/countries/german_counties/bayern.svg" alt="Bayern Flagge" />
+                  {:else if bundesland === "Berlin"}
+                    <img src="/countries/german_counties/berlin.svg" alt="Berlin Flagge" />
+                  {:else if bundesland === "Brandenburg"}
+                    <img src="/countries/german_counties/brandenburg.svg" alt="Brandenburg Flagge" />
+                  {:else if bundesland === "Bremen"}
+                    <img src="/countries/german_counties/bremen.svg" alt="Bremen Flagge" />
+                  {:else if bundesland === "Hamburg"}
+                    <img src="/countries/german_counties/hamburg.svg" alt="Hamburg Flagge" />
+                  {:else if bundesland === "Hessen"}
+                    <img src="/countries/german_counties/hessen.svg" alt="Hessen Flagge" />
+                  {:else if bundesland === "Mecklenburg-Vorpommern"}
+                    <img
+                      src="/countries/german_counties/mecklenburg-vorpommern.svg"
+                      alt="Mecklenburg-Vorpommern Flagge"
+                    />
+                  {:else if bundesland === "Niedersachsen"}
+                    <img src="/countries/german_counties/niedersachsen.svg" alt="Niedersachsen Flagge" />
+                  {:else if bundesland === "Nordrhein-Westfalen"}
+                    <img src="/countries/german_counties/nordrhein-westfalen.svg" alt="Nordrhein-Westfalen Flagge" />
+                  {:else if bundesland === "Rheinland-Pfalz"}
+                    <img src="/countries/german_counties/rheinland-pfalz.svg" alt="Rheinland-Pfalz Flagge" />
+                  {:else if bundesland === "Saarland"}
+                    <img src="/countries/german_counties/saarland.svg" alt="Saarland Flagge" />
+                  {:else if bundesland === "Sachsen"}
+                    <img src="/countries/german_counties/sachsen.svg" alt="Sachsen Flagge" />
+                  {:else if bundesland === "Sachsen-Anhalt"}
+                    <img src="/countries/german_counties/sachsen-anhalt.svg" alt="Sachsen-Anhalt Flagge" />
+                  {:else if bundesland === "Schleswig-Holstein"}
+                    <img src="/countries/german_counties/schleswig-holstein.svg" alt="Schleswig-Holstein Flagge" />
+                  {:else if bundesland === "Thüringen"}
+                    <img src="/countries/german_counties/thueringen.svg" alt="Thüringen Flagge" />
+                  {:else}
+                    🇩🇪
+                  {/if}
                 </div>
                 <div class="bundesland-name">
                   {bundesland}
@@ -168,7 +194,7 @@
             </svg>
             Profil-Daten bearbeiten
           </button>
-          <small>Ändern Sie Ihre Jahrgangsstufe, Bundesland und Interessensfächer</small>
+          <small>Ändern Sie Ihre Jahrgangsstufe, Art der Schule, Bundesland und Interessensfächer</small>
         </div>
       </div>
 
@@ -345,11 +371,25 @@
     border-radius: 12px;
     opacity: 0.7;
   }
-
   .bundesland-flag {
-    font-size: 3rem;
     margin-bottom: 0.5rem;
     line-height: 1;
+    width: 100px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bundesland-flag img {
+    max-width: 100px;
+    max-height: 80px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
   }
 
   .bundesland-name {

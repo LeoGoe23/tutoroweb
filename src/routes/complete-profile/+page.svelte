@@ -4,11 +4,12 @@
   import { page } from "$app/stores";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
-  import type { Jahrgangsstufe, Bundesland, KursFach } from "$lib/types";
+  import type { Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "$lib/types";
 
   // Form state
   let jahrgangsstufe: Jahrgangsstufe | "" = "";
   let bundesland: Bundesland | "" = "";
+  let schulArt: SchulArt | "" = "";
   let kursFach: KursFach[] = [];
   let isSubmitting = false;
   let error = "";
@@ -23,20 +24,18 @@
   $: if ($userProfile?.profileCompleted && !isEditMode) {
     goto("/dashboard");
   }
-
   // Load existing data in edit mode
   $: if (isEditMode && $userProfile) {
     jahrgangsstufe = $userProfile.jahrgangsstufe || "";
     bundesland = $userProfile.bundesland || "";
+    schulArt = $userProfile.schulArt || "";
     kursFach = $userProfile.kursFach || [];
   }
 
   // Handle form submission
   async function handleSubmit() {
-    if (isSubmitting) return;
-
-    // Validation
-    if (!jahrgangsstufe || !bundesland || kursFach.length === 0) {
+    if (isSubmitting) return; // Validation
+    if (!jahrgangsstufe || !schulArt || !bundesland || kursFach.length === 0) {
       error = "Bitte fülle alle Felder aus und wähle mindestens ein Fach.";
       return;
     }
@@ -49,6 +48,7 @@
       const updatedProfile = await userProfileService.completeUserProfile($user.uid, {
         jahrgangsstufe: jahrgangsstufe as Jahrgangsstufe,
         bundesland: bundesland as Bundesland,
+        schulArt: schulArt as SchulArt,
         kursFach,
       }); // Update the user profile in the auth store
       if (updatedProfile) {
@@ -96,7 +96,6 @@
           {error}
         </div>
       {/if}
-
       <div class="form-group">
         <label for="jahrgangsstufe">Jahrgangsstufe *</label>
         <select id="jahrgangsstufe" bind:value={jahrgangsstufe} required disabled={isSubmitting}>
@@ -112,6 +111,28 @@
           <option value="13">13. Klasse</option>
           <option value="Studium">Studium</option>
           <option value="Erwachsenenbildung">Erwachsenenbildung</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="schulart">Art der Schule *</label>
+        <select id="schulart" bind:value={schulArt} required disabled={isSubmitting}>
+          <option value="">Bitte wählen...</option>
+          <option value="Grundschule">Grundschule</option>
+          <option value="Hauptschule">Hauptschule</option>
+          <option value="Realschule">Realschule</option>
+          <option value="Gesamtschule">Gesamtschule</option>
+          <option value="Gymnasium">Gymnasium</option>
+          <option value="Berufsschule">Berufsschule</option>
+          <option value="Berufsoberschule">Berufsoberschule</option>
+          <option value="Fachoberschule">Fachoberschule</option>
+          <option value="Fachhochschule">Fachhochschule</option>
+          <option value="Universität">Universität</option>
+          <option value="Privatschule">Privatschule</option>
+          <option value="Waldorfschule">Waldorfschule</option>
+          <option value="Montessori-Schule">Montessori-Schule</option>
+          <option value="Internationale Schule">Internationale Schule</option>
+          <option value="Sonstiges">Sonstiges</option>
         </select>
       </div>
 
