@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { user, loading, authError, authStore } from "$lib/auth";
+  import { user, loading, authError, authStore, userProfile } from "$lib/auth";
 
   // Form state
   let isLoginTab = true;
@@ -13,47 +13,49 @@
   let isSubmitting = false;
 
   // Redirect if already authenticated
-  $: if ($user && !$loading) {
-    goto("/dashboard");
+  $: if ($user && !$loading && $userProfile) {
+    if ($userProfile.profileCompleted) {
+      goto("/dashboard");
+    } else {
+      goto("/complete-profile");
+    }
   }
 
   // Handle form submission
   async function handleSubmit() {
     if (isSubmitting) return;
 
-    authStore.clearError();
-
-    // Validation
+    authStore.clearError(); // Validation
     if (!email || !password) {
-      authError.set("Please fill in all fields");
+      authError.set("Bitte füllen Sie alle Felder aus");
       return;
     }
 
     if (!isLoginTab && (!firstName || !lastName)) {
-      authError.set("Please fill in your first and last name");
+      authError.set("Bitte geben Sie Ihren Vor- und Nachnamen ein");
       return;
     }
 
     if (!isLoginTab && password !== confirmPassword) {
-      authError.set("Passwords do not match");
+      authError.set("Passwörter stimmen nicht überein");
       return;
     }
 
     if (!isLoginTab && password.length < 6) {
-      authError.set("Password must be at least 6 characters");
+      authError.set("Passwort muss mindestens 6 Zeichen lang sein");
       return;
     }
 
     isSubmitting = true;
-
     try {
       if (isLoginTab) {
         await authStore.signIn(email, password);
+        // Redirect will be handled by reactive statement above
       } else {
         const displayName = `${firstName} ${lastName}`;
         await authStore.signUp(email, password, displayName, firstName, lastName);
+        goto("/complete-profile");
       }
-      goto("/dashboard");
     } catch (error: any) {
       console.error("Auth error:", error);
       // Error is handled by the auth store
@@ -71,7 +73,6 @@
     firstName = "";
     lastName = "";
   }
-
   // Handle Google Sign-In
   async function handleGoogleSignIn() {
     if (isSubmitting) return;
@@ -81,7 +82,7 @@
 
     try {
       await authStore.signInWithGoogle();
-      goto("/dashboard");
+      // Redirect will be handled by reactive statement above
     } catch (error: any) {
       console.error("Google sign-in error:", error);
     } finally {
@@ -116,9 +117,8 @@
         {$authError}
       </div>
     {/if}
-
     {#if $loading}
-      <div class="loading-message">Loading...</div>
+      <div class="loading-message">Wird geladen...</div>
     {/if}
 
     <!-- Login Form -->

@@ -1,7 +1,7 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, type DocumentReference } from "firebase/firestore";
 import { db } from "./firebase";
 import type { User } from "firebase/auth";
-import type { UserSubscription } from "./types";
+import type { UserSubscription, Jahrgangsstufe, Bundesland, KursFach } from "./types";
 
 export interface UserProfile {
   uid: string;
@@ -12,6 +12,15 @@ export interface UserProfile {
   photoURL?: string;
   createdAt: any;
   updatedAt: any;
+  
+  // Profile completion status
+  profileCompleted: boolean;
+  
+  // School information
+  jahrgangsstufe?: Jahrgangsstufe;
+  bundesland?: Bundesland;
+  kursFach?: KursFach[];
+  
   subscription?: UserSubscription;
   preferences?: {
     language: string;
@@ -54,6 +63,7 @@ export const userProfileService = {
         photoURL: photoURL || undefined,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        profileCompleted: false,
         subscription: {
           tier: 'free',
           status: 'active',
@@ -165,6 +175,33 @@ export const userProfileService = {
       return true;
     } catch (error) {
       console.error("Error updating user subscription:", error);
+      throw error;
+    }
+  },
+  
+  // Complete user profile with school information
+  completeUserProfile: async (
+    uid: string, 
+    schoolInfo: {
+      jahrgangsstufe: Jahrgangsstufe;
+      bundesland: Bundesland;
+      kursFach: KursFach[];
+    }
+  ) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      await updateDoc(userRef, {
+        jahrgangsstufe: schoolInfo.jahrgangsstufe,
+        bundesland: schoolInfo.bundesland,
+        kursFach: schoolInfo.kursFach,
+        profileCompleted: true,
+        updatedAt: serverTimestamp(),
+      });
+      
+      // Return the updated profile
+      return await userProfileService.getUserProfile(uid);
+    } catch (error) {
+      console.error("Error completing user profile:", error);
       throw error;
     }
   },

@@ -1,13 +1,12 @@
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { subscriptionService } from '$lib/subscription';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { subscriptionService } from "$lib/subscription";
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const { planId, userId } = await request.json();
-
     if (!planId || !userId) {
-      return json({ error: 'Missing planId or userId' }, { status: 400 });
+      return json({ error: "PlanId oder UserId fehlt" }, { status: 400 });
     }
 
     // Create checkout session
@@ -15,7 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json({ url: session.url });
   } catch (error) {
-    console.error('Checkout session creation failed:', error);
-    return json({ error: 'Failed to create checkout session' }, { status: 500 });
+    console.error("Checkout session creation failed:", error);
+    return json({ error: "Fehler beim Erstellen der Checkout-Session" }, { status: 500 });
   }
 };

@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { user, userProfile, loading as authLoading } from '$lib/auth';
-  import { goto } from '$app/navigation';
-  import { browser } from '$app/environment';
-  import { subscriptionService } from '$lib/subscription';
-  import type { SubscriptionPlan, SubscriptionTier } from '$lib/types';
+  import { onMount } from "svelte";
+  import { user, userProfile, loading as authLoading } from "$lib/auth";
+  import { goto } from "$app/navigation";
+  import { browser } from "$app/environment";
+  import { subscriptionService } from "$lib/subscription";
+  import type { SubscriptionPlan, SubscriptionTier } from "$lib/types";
 
   let plans: SubscriptionPlan[] = [];
   let loading = false;
-  let error = '';  // Redirect if not authenticated (only on client side)
+  let error = ""; // Redirect if not authenticated (only on client side)
   $: if (browser && !$authLoading && $user === null) {
-    goto('/auth');
+    goto("/auth");
   }
 
   onMount(() => {
@@ -18,22 +18,22 @@
   });
   async function handleUpgrade(planId: SubscriptionTier) {
     if (!$user) return;
-    
+
     const plan = subscriptionService.getPlan(planId);
     if (plan?.comingSoon) {
-      alert('Dieser Plan ist noch nicht verfügbar. Wir arbeiten daran!');
+      alert("Dieser Plan ist noch nicht verfügbar. Wir arbeiten daran!");
       return;
     }
-    
+
     loading = true;
-    error = '';
-    
+    error = "";
+
     try {
-      if (planId === 'free') {
+      if (planId === "free") {
         // Downgrade to free
         await subscriptionService.updateUserSubscription($user.uid, {
-          tier: 'free',
-          status: 'active'
+          tier: "free",
+          status: "active",
         });
         // Refresh user profile
         location.reload();
@@ -43,8 +43,8 @@
         window.location.href = url;
       }
     } catch (err) {
-      error = 'Fehler beim Ändern des Abonnements. Bitte versuchen Sie es erneut.';
-      console.error('Subscription error:', err);
+      error = "Fehler beim Ändern des Abonnements. Bitte versuchen Sie es erneut.";
+      console.error("Subscription error:", err);
     } finally {
       loading = false;
     }
@@ -52,56 +52,57 @@
 
   async function handleManageBilling() {
     if (!$user || !$userProfile?.subscription?.stripeCustomerId) return;
-    
+
     loading = true;
     try {
       const { url } = await subscriptionService.createPortalSession($userProfile.subscription.stripeCustomerId);
       window.location.href = url;
     } catch (err) {
-      error = 'Fehler beim Öffnen des Billing-Portals.';
-      console.error('Portal error:', err);
+      error = "Fehler beim Öffnen des Billing-Portals.";
+      console.error("Portal error:", err);
     } finally {
       loading = false;
     }
   }
 
   function formatPrice(price: number): string {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: 'EUR'
+    return new Intl.NumberFormat("de-DE", {
+      style: "currency",
+      currency: "EUR",
     }).format(price);
   }
 
   function isCurrentPlan(planId: SubscriptionTier): boolean {
     return $userProfile?.subscription?.tier === planId;
-  }  function getButtonText(planId: SubscriptionTier): string {
+  }
+  function getButtonText(planId: SubscriptionTier): string {
     const plan = subscriptionService.getPlan(planId);
-    
+
     if (plan?.comingSoon) {
-      return 'Bald verfügbar';
+      return "Bald verfügbar";
     }
-    
+
     if (isCurrentPlan(planId)) {
-      return 'Aktueller Plan';
+      return "Aktueller Plan";
     }
-    
-    const currentTier = $userProfile?.subscription?.tier || 'free';
-    const tierOrder = ['free', 'plus', 'pro'];
+
+    const currentTier = $userProfile?.subscription?.tier || "free";
+    const tierOrder = ["free", "plus", "pro"];
     const currentIndex = tierOrder.indexOf(currentTier);
     const targetIndex = tierOrder.indexOf(planId);
-    
+
     if (targetIndex > currentIndex) {
-      return 'Upgrade';
+      return "Upgrade";
     } else if (targetIndex < currentIndex) {
-      return 'Downgrade';
+      return "Downgrade";
     }
-    
-    return 'Auswählen';
+
+    return "Auswählen";
   }
 </script>
 
 <svelte:head>
-  <title>Subscription Management - Tutoro</title>
+  <title>Abonnement verwalten - Tutoro</title>
 </svelte:head>
 
 <div class="subscription-page">
@@ -123,24 +124,22 @@
         <h2>Ihr aktuelles Abonnement</h2>
         <div class="current-plan-card">
           <div class="plan-info">
-            <h3>{subscriptionService.getPlan($userProfile.subscription.tier)?.name || 'Unknown'}</h3>
+            <h3>{subscriptionService.getPlan($userProfile.subscription.tier)?.name || "Unknown"}</h3>
             <p class="status status-{$userProfile.subscription.status}">
-              Status: {$userProfile.subscription.status === 'active' ? 'Aktiv' : 
-                      $userProfile.subscription.status === 'canceled' ? 'Gekündigt' : 
-                      $userProfile.subscription.status}
+              Status: {$userProfile.subscription.status === "active"
+                ? "Aktiv"
+                : $userProfile.subscription.status === "canceled"
+                  ? "Gekündigt"
+                  : $userProfile.subscription.status}
             </p>
             {#if $userProfile.subscription.currentPeriodEnd}
               <p class="renewal-date">
-                Nächste Abrechnung: {new Date($userProfile.subscription.currentPeriodEnd).toLocaleDateString('de-DE')}
+                Nächste Abrechnung: {new Date($userProfile.subscription.currentPeriodEnd).toLocaleDateString("de-DE")}
               </p>
             {/if}
           </div>
-          {#if $userProfile.subscription.tier !== 'free' && $userProfile.subscription.stripeCustomerId}
-            <button 
-              on:click={handleManageBilling} 
-              disabled={loading}
-              class="btn btn-secondary"
-            >
+          {#if $userProfile.subscription.tier !== "free" && $userProfile.subscription.stripeCustomerId}
+            <button on:click={handleManageBilling} disabled={loading} class="btn btn-secondary">
               Abrechnung verwalten
             </button>
           {/if}
@@ -151,16 +150,22 @@
     <!-- Subscription Plans -->
     <div class="plans-section">
       <h2>Verfügbare Pläne</h2>
-      <div class="plans-grid">        {#each plans as plan (plan.id)}
-          <div class="plan-card" class:popular={plan.isPopular} class:current={isCurrentPlan(plan.id)} class:coming-soon={plan.comingSoon}>
+      <div class="plans-grid">
+        {#each plans as plan (plan.id)}
+          <div
+            class="plan-card"
+            class:popular={plan.isPopular}
+            class:current={isCurrentPlan(plan.id)}
+            class:coming-soon={plan.comingSoon}
+          >
             {#if plan.isPopular}
               <div class="popular-badge">Beliebt</div>
             {/if}
-            
+
             {#if plan.comingSoon}
               <div class="coming-soon-badge">Bald verfügbar</div>
             {/if}
-              <div class="plan-header">
+            <div class="plan-header">
               <h3>{plan.name}</h3>
               <div class="price">
                 {#if plan.comingSoon && plan.price === 0}
@@ -168,7 +173,7 @@
                 {:else}
                   <span class="amount">{formatPrice(plan.price)}</span>
                   {#if plan.price > 0}
-                    <span class="interval">/{plan.interval === 'month' ? 'Monat' : 'Jahr'}</span>
+                    <span class="interval">/{plan.interval === "month" ? "Monat" : "Jahr"}</span>
                   {/if}
                 {/if}
               </div>
@@ -178,19 +183,29 @@
               {#each plan.features as feature}
                 <li>
                   <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
                   </svg>
                   {feature}
                 </li>
               {/each}
             </ul>
 
-            <button 
+            <button
               on:click={() => handleUpgrade(plan.id)}
               disabled={loading || isCurrentPlan(plan.id) || plan.comingSoon}
-              class="btn {isCurrentPlan(plan.id) ? 'btn-current' : plan.comingSoon ? 'btn-coming-soon' : plan.isPopular ? 'btn-primary' : 'btn-outline'}"
+              class="btn {isCurrentPlan(plan.id)
+                ? 'btn-current'
+                : plan.comingSoon
+                  ? 'btn-coming-soon'
+                  : plan.isPopular
+                    ? 'btn-primary'
+                    : 'btn-outline'}"
             >
-              {loading ? 'Laden...' : getButtonText(plan.id)}
+              {loading ? "Laden..." : getButtonText(plan.id)}
             </button>
           </div>
         {/each}
@@ -203,19 +218,31 @@
       <div class="faq-grid">
         <div class="faq-item">
           <h4>Kann ich jederzeit kündigen?</h4>
-          <p>Ja, Sie können Ihr Abonnement jederzeit kündigen. Ihr Zugang bleibt bis zum Ende des aktuellen Abrechnungszeitraums bestehen.</p>
+          <p>
+            Ja, Sie können Ihr Abonnement jederzeit kündigen. Ihr Zugang bleibt bis zum Ende des aktuellen
+            Abrechnungszeitraums bestehen.
+          </p>
         </div>
         <div class="faq-item">
           <h4>Was passiert bei einem Downgrade?</h4>
-          <p>Bei einem Downgrade wird Ihr neuer Plan am Ende des aktuellen Abrechnungszeitraums aktiv. Sie behalten bis dahin Zugang zu allen Premium-Features.</p>
+          <p>
+            Bei einem Downgrade wird Ihr neuer Plan am Ende des aktuellen Abrechnungszeitraums aktiv. Sie behalten bis
+            dahin Zugang zu allen Premium-Features.
+          </p>
         </div>
         <div class="faq-item">
           <h4>Wie funktioniert die Abrechnung?</h4>
-          <p>Die Abrechnung erfolgt automatisch über Stripe. Sie erhalten eine Rechnung per E-Mail und können Ihre Zahlungsmethoden jederzeit verwalten.</p>
+          <p>
+            Die Abrechnung erfolgt automatisch über Stripe. Sie erhalten eine Rechnung per E-Mail und können Ihre
+            Zahlungsmethoden jederzeit verwalten.
+          </p>
         </div>
         <div class="faq-item">
           <h4>Gibt es eine Geld-zurück-Garantie?</h4>
-          <p>Ja, wir bieten eine 30-Tage-Geld-zurück-Garantie für alle kostenpflichtigen Pläne. Kontaktieren Sie einfach unseren Support.</p>
+          <p>
+            Ja, wir bieten eine 30-Tage-Geld-zurück-Garantie für alle kostenpflichtigen Pläne. Kontaktieren Sie einfach
+            unseren Support.
+          </p>
         </div>
       </div>
     </div>
@@ -334,7 +361,9 @@
     border-radius: 16px;
     padding: 2rem;
     position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
     border: 2px solid transparent;
   }
 

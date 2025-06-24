@@ -1,23 +1,28 @@
 <script lang="ts">
-  import { user, loading } from "$lib/auth";
+  import { user, loading, userProfile } from "$lib/auth";
   import { goto } from "$app/navigation";
 
   // Redirect if not authenticated
   $: if (!$loading && !$user) {
     goto("/auth");
   }
+
+  // Redirect to profile completion if profile is incomplete
+  $: if (!$loading && $user && $userProfile && !$userProfile.profileCompleted) {
+    goto("/complete-profile");
+  }
 </script>
 
 {#if $loading}
   <div class="loading-screen">
     <div class="loading-spinner"></div>
-    <p>Loading...</p>
+    <p>Wird geladen...</p>
   </div>
 {:else if $user}
   <slot />
 {:else}
   <div class="auth-required">
-    <p>Authentication required. Redirecting...</p>
+    <p>Anmeldung erforderlich. Weiterleitung...</p>
   </div>
 {/if}
 

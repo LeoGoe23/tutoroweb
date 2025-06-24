@@ -9,14 +9,14 @@ export interface AuthError {
 }
 
 // Subscription types
-export type SubscriptionTier = 'free' | 'plus' | 'pro';
+export type SubscriptionTier = "free" | "plus" | "pro";
 
 export interface SubscriptionPlan {
   id: SubscriptionTier;
   name: string;
   price: number;
   currency: string;
-  interval: 'month' | 'year';
+  interval: "month" | "year";
   features: string[];
   isPopular?: boolean;
   comingSoon?: boolean;
@@ -25,7 +25,7 @@ export interface SubscriptionPlan {
 
 export interface UserSubscription {
   tier: SubscriptionTier;
-  status: 'active' | 'canceled' | 'past_due' | 'unpaid';
+  status: "active" | "canceled" | "past_due" | "unpaid";
   currentPeriodStart?: Date;
   currentPeriodEnd?: Date;
   cancelAtPeriodEnd?: boolean;
@@ -34,3 +34,49 @@ export interface UserSubscription {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// German school system types
+export type Jahrgangsstufe = "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "Studium" | "Erwachsenenbildung";
+
+export type Bundesland =
+  | "Baden-Württemberg"
+  | "Bayern"
+  | "Berlin"
+  | "Brandenburg"
+  | "Bremen"
+  | "Hamburg"
+  | "Hessen"
+  | "Mecklenburg-Vorpommern"
+  | "Niedersachsen"
+  | "Nordrhein-Westfalen"
+  | "Rheinland-Pfalz"
+  | "Saarland"
+  | "Sachsen"
+  | "Sachsen-Anhalt"
+  | "Schleswig-Holstein"
+  | "Thüringen";
+
+export type KursFach =
+  | "Mathematik"
+  | "Deutsch"
+  | "Englisch"
+  | "Französisch"
+  | "Spanisch"
+  | "Latein"
+  | "Physik"
+  | "Chemie"
+  | "Biologie"
+  | "Erdkunde"
+  | "Geschichte"
+  | "Politik"
+  | "Wirtschaft"
+  | "Religion"
+  | "Ethik"
+  | "Kunst"
+  | "Musik"
+  | "Sport"
+  | "Informatik"
+  | "Philosophie"
+  | "Psychologie"
+  | "Pädagogik"
+  | "Sonstiges";

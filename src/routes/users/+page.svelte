@@ -2,19 +2,19 @@
   // This page is now deprecated since user management is handled through Firebase
   // Consider redirecting to dashboard or removing this route
 
-  let message = "User management is now handled through Firebase Authentication and Firestore.";
+  let message = "Die Benutzerverwaltung wird jetzt über Firebase Authentication und Firestore abgewickelt.";
 </script>
 
 <svelte:head>
-  <title>Users - Tutoro</title>
+  <title>Benutzer - Tutoro</title>
 </svelte:head>
 
 <div class="container">
-  <h1>User Management</h1>
+  <h1>Benutzerverwaltung</h1>
   <p>{message}</p>
   <p>
-    <a href="/dashboard">Go to Dashboard</a> |
-    <a href="/auth">Authentication</a>
+    <a href="/dashboard">Zum Dashboard</a> |
+    <a href="/auth">Anmeldung</a>
   </p>
 </div>
 

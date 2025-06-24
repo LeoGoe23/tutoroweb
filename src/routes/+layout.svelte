@@ -33,18 +33,19 @@
     </div>
     <div class="nav-actions">
       {#if $loading}
-        <div class="nav-btn loading">Loading...</div>      {:else if $user}
+        <div class="nav-btn loading">Wird geladen...</div>
+      {:else if $user}
         <a href="/dashboard" class="nav-btn dashboard">Dashboard</a>
         <a href="/subscription" class="nav-btn subscription">Abonnement</a>
-        <a href="/settings" class="nav-btn settings">Settings</a>
+        <a href="/settings" class="nav-btn settings">Einstellungen</a>
         <div class="user-info">
           <span class="user-email">
             {$userProfile?.firstName || $user?.displayName || $user?.email}
           </span>
-          <button on:click={handleLogout} class="nav-btn logout">Logout</button>
+          <button on:click={handleLogout} class="nav-btn logout">Abmelden</button>
         </div>
       {:else}
-        <a href="/auth" class="nav-btn login">Login</a>
+        <a href="/auth" class="nav-btn login">Anmelden</a>
         <a href="/auth" class="nav-btn register">Kostenlos testen</a>
       {/if}
     </div>
