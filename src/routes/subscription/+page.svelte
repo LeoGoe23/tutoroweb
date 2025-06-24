@@ -160,13 +160,16 @@
             {#if plan.comingSoon}
               <div class="coming-soon-badge">Bald verfügbar</div>
             {/if}
-            
-            <div class="plan-header">
+              <div class="plan-header">
               <h3>{plan.name}</h3>
               <div class="price">
-                <span class="amount">{formatPrice(plan.price)}</span>
-                {#if plan.price > 0}
-                  <span class="interval">/{plan.interval === 'month' ? 'Monat' : 'Jahr'}</span>
+                {#if plan.comingSoon && plan.price === 0}
+                  <span class="amount-coming-soon">Preis folgt</span>
+                {:else}
+                  <span class="amount">{formatPrice(plan.price)}</span>
+                  {#if plan.price > 0}
+                    <span class="interval">/{plan.interval === 'month' ? 'Monat' : 'Jahr'}</span>
+                  {/if}
                 {/if}
               </div>
             </div>
@@ -385,6 +388,13 @@
     font-size: 3rem;
     font-weight: 700;
     color: #6366f1;
+  }
+
+  .amount-coming-soon {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #6b7280;
+    font-style: italic;
   }
 
   .interval {

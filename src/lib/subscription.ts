@@ -33,11 +33,10 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'Fortschritts-Tracking'
     ],
     stripePriceId: 'price_plus_monthly' // Placeholder - replace with actual Stripe price ID
-  },
-  {
+  },  {
     id: 'pro',
     name: 'Pro',
-    price: 79.99,
+    price: 0, // Price not announced yet
     currency: 'EUR',
     interval: 'month',
     comingSoon: true,
