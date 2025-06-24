@@ -102,76 +102,95 @@
       </div>
       <div class="section">
         <h2>Schulinformationen</h2>
-        <div class="info-group">
-          <label>Jahrgangsstufe</label>
-          <div class="info-value">
-            {jahrgangsstufe || "Nicht angegeben"}
+        <div class="school-info-grid">
+          <div class="school-info-left">
+            <div class="info-group">
+              <label>Jahrgangsstufe</label>
+              <div class="info-value compact">
+                {#if jahrgangsstufe === "Studium"}
+                  Studium
+                {:else if jahrgangsstufe === "Erwachsenenbildung"}
+                  Erwachsenenbildung
+                {:else if jahrgangsstufe}
+                  {jahrgangsstufe}. Klasse
+                {:else}
+                  Nicht angegeben
+                {/if}
+              </div>
+            </div>
+
+            <div class="info-group">
+              <label>Art der Schule</label>
+              <div class="info-value compact">
+                {schulArt || "Nicht angegeben"}
+              </div>
+            </div>
+          </div>
+
+          <div class="school-info-right">
+            <div class="info-group">
+              <label>Bundesland</label>
+              <div class="info-value bundesland-display">
+                {#if bundesland}
+                  <div class="bundesland-card">
+                    <div class="bundesland-flag">
+                      {#if bundesland === "Baden-Württemberg"}
+                        <img src="/countries/german_counties/baden-wuerttemberg.svg" alt="Baden-Württemberg Flagge" />
+                      {:else if bundesland === "Bayern"}
+                        <img src="/countries/german_counties/bayern.svg" alt="Bayern Flagge" />
+                      {:else if bundesland === "Berlin"}
+                        <img src="/countries/german_counties/berlin.svg" alt="Berlin Flagge" />
+                      {:else if bundesland === "Brandenburg"}
+                        <img src="/countries/german_counties/brandenburg.svg" alt="Brandenburg Flagge" />
+                      {:else if bundesland === "Bremen"}
+                        <img src="/countries/german_counties/bremen.svg" alt="Bremen Flagge" />
+                      {:else if bundesland === "Hamburg"}
+                        <img src="/countries/german_counties/hamburg.svg" alt="Hamburg Flagge" />
+                      {:else if bundesland === "Hessen"}
+                        <img src="/countries/german_counties/hessen.svg" alt="Hessen Flagge" />
+                      {:else if bundesland === "Mecklenburg-Vorpommern"}
+                        <img
+                          src="/countries/german_counties/mecklenburg-vorpommern.svg"
+                          alt="Mecklenburg-Vorpommern Flagge"
+                        />
+                      {:else if bundesland === "Niedersachsen"}
+                        <img src="/countries/german_counties/niedersachsen.svg" alt="Niedersachsen Flagge" />
+                      {:else if bundesland === "Nordrhein-Westfalen"}
+                        <img
+                          src="/countries/german_counties/nordrhein-westfalen.svg"
+                          alt="Nordrhein-Westfalen Flagge"
+                        />
+                      {:else if bundesland === "Rheinland-Pfalz"}
+                        <img src="/countries/german_counties/rheinland-pfalz.svg" alt="Rheinland-Pfalz Flagge" />
+                      {:else if bundesland === "Saarland"}
+                        <img src="/countries/german_counties/saarland.svg" alt="Saarland Flagge" />
+                      {:else if bundesland === "Sachsen"}
+                        <img src="/countries/german_counties/sachsen.svg" alt="Sachsen Flagge" />
+                      {:else if bundesland === "Sachsen-Anhalt"}
+                        <img src="/countries/german_counties/sachsen-anhalt.svg" alt="Sachsen-Anhalt Flagge" />
+                      {:else if bundesland === "Schleswig-Holstein"}
+                        <img src="/countries/german_counties/schleswig-holstein.svg" alt="Schleswig-Holstein Flagge" />
+                      {:else if bundesland === "Thüringen"}
+                        <img src="/countries/german_counties/thueringen.svg" alt="Thüringen Flagge" />
+                      {:else}
+                        🇩🇪
+                      {/if}
+                    </div>
+                    <div class="bundesland-name">
+                      {bundesland}
+                    </div>
+                  </div>
+                {:else}
+                  <div class="bundesland-placeholder">
+                    <div class="bundesland-flag">🇩🇪</div>
+                    <div class="bundesland-name">Nicht angegeben</div>
+                  </div>
+                {/if}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="info-group">
-          <label>Art der Schule</label>
-          <div class="info-value">
-            {schulArt || "Nicht angegeben"}
-          </div>
-        </div>
-        <div class="info-group">
-          <label>Bundesland</label>
-          <div class="info-value bundesland-display">
-            {#if bundesland}
-              <div class="bundesland-card">
-                <div class="bundesland-flag">
-                  {#if bundesland === "Baden-Württemberg"}
-                    <img src="/countries/german_counties/baden-wuerttemberg.svg" alt="Baden-Württemberg Flagge" />
-                  {:else if bundesland === "Bayern"}
-                    <img src="/countries/german_counties/bayern.svg" alt="Bayern Flagge" />
-                  {:else if bundesland === "Berlin"}
-                    <img src="/countries/german_counties/berlin.svg" alt="Berlin Flagge" />
-                  {:else if bundesland === "Brandenburg"}
-                    <img src="/countries/german_counties/brandenburg.svg" alt="Brandenburg Flagge" />
-                  {:else if bundesland === "Bremen"}
-                    <img src="/countries/german_counties/bremen.svg" alt="Bremen Flagge" />
-                  {:else if bundesland === "Hamburg"}
-                    <img src="/countries/german_counties/hamburg.svg" alt="Hamburg Flagge" />
-                  {:else if bundesland === "Hessen"}
-                    <img src="/countries/german_counties/hessen.svg" alt="Hessen Flagge" />
-                  {:else if bundesland === "Mecklenburg-Vorpommern"}
-                    <img
-                      src="/countries/german_counties/mecklenburg-vorpommern.svg"
-                      alt="Mecklenburg-Vorpommern Flagge"
-                    />
-                  {:else if bundesland === "Niedersachsen"}
-                    <img src="/countries/german_counties/niedersachsen.svg" alt="Niedersachsen Flagge" />
-                  {:else if bundesland === "Nordrhein-Westfalen"}
-                    <img src="/countries/german_counties/nordrhein-westfalen.svg" alt="Nordrhein-Westfalen Flagge" />
-                  {:else if bundesland === "Rheinland-Pfalz"}
-                    <img src="/countries/german_counties/rheinland-pfalz.svg" alt="Rheinland-Pfalz Flagge" />
-                  {:else if bundesland === "Saarland"}
-                    <img src="/countries/german_counties/saarland.svg" alt="Saarland Flagge" />
-                  {:else if bundesland === "Sachsen"}
-                    <img src="/countries/german_counties/sachsen.svg" alt="Sachsen Flagge" />
-                  {:else if bundesland === "Sachsen-Anhalt"}
-                    <img src="/countries/german_counties/sachsen-anhalt.svg" alt="Sachsen-Anhalt Flagge" />
-                  {:else if bundesland === "Schleswig-Holstein"}
-                    <img src="/countries/german_counties/schleswig-holstein.svg" alt="Schleswig-Holstein Flagge" />
-                  {:else if bundesland === "Thüringen"}
-                    <img src="/countries/german_counties/thueringen.svg" alt="Thüringen Flagge" />
-                  {:else}
-                    🇩🇪
-                  {/if}
-                </div>
-                <div class="bundesland-name">
-                  {bundesland}
-                </div>
-              </div>
-            {:else}
-              <div class="bundesland-placeholder">
-                <div class="bundesland-flag">🇩🇪</div>
-                <div class="bundesland-name">Nicht angegeben</div>
-              </div>
-            {/if}
-          </div>
-        </div>
         <div class="info-group">
           <label>Interessensfächer</label>
           <div class="info-value">
@@ -186,6 +205,7 @@
             {/if}
           </div>
         </div>
+
         <div class="profile-completion-action">
           <button type="button" on:click={() => goto("/complete-profile?edit=true")} class="btn profile-edit">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -193,45 +213,44 @@
               <path d="m18.5 2.5 3 3L12 15l-4 1 1-4z" />
             </svg>
             Profil-Daten bearbeiten
+          </button> <small>Ändern Sie Ihre Jahrgangsstufe, Art der Schule, Bundesland und Interessensfächer</small>
+        </div>
+
+        <div class="section">
+          <h2>Einstellungen</h2>
+
+          <div class="form-group">
+            <label for="language">Sprache</label>
+            <select id="language" bind:value={language} disabled={isSubmitting}>
+              <option value="de">Deutsch</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="theme">Design</label>
+            <select id="theme" bind:value={theme} disabled={isSubmitting}>
+              <option value="light">Hell</option>
+              <option value="dark">Dunkel</option>
+              <option value="auto">Automatisch</option>
+            </select>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox">
+              <input type="checkbox" bind:checked={notifications} disabled={isSubmitting} />
+              <span>Benachrichtigungen aktivieren</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" on:click={() => goto("/dashboard")} class="btn secondary"> Abbrechen </button>
+          <button type="submit" class="btn primary" disabled={isSubmitting}>
+            {isSubmitting ? "Wird aktualisiert..." : "Profil aktualisieren"}
           </button>
-          <small>Ändern Sie Ihre Jahrgangsstufe, Art der Schule, Bundesland und Interessensfächer</small>
         </div>
-      </div>
-
-      <div class="section">
-        <h2>Einstellungen</h2>
-
-        <div class="form-group">
-          <label for="language">Sprache</label>
-          <select id="language" bind:value={language} disabled={isSubmitting}>
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="theme">Design</label>
-          <select id="theme" bind:value={theme} disabled={isSubmitting}>
-            <option value="light">Hell</option>
-            <option value="dark">Dunkel</option>
-            <option value="auto">Automatisch</option>
-          </select>
-        </div>
-
-        <div class="form-group checkbox-group">
-          <label class="checkbox">
-            <input type="checkbox" bind:checked={notifications} disabled={isSubmitting} />
-            <span>Benachrichtigungen aktivieren</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button type="button" on:click={() => goto("/dashboard")} class="btn secondary"> Abbrechen </button>
-        <button type="submit" class="btn primary" disabled={isSubmitting}>
-          {isSubmitting ? "Wird aktualisiert..." : "Profil aktualisieren"}
-        </button>
       </div>
     </form>
   </div>
@@ -330,6 +349,7 @@
     font-weight: 600;
     font-size: 0.9rem;
   }
+
   .info-value {
     padding: 0.75rem;
     background: #f9fafb;
@@ -337,6 +357,34 @@
     border-radius: 6px;
     color: #6b7280;
     font-size: 1rem;
+  }
+
+  .info-value.compact {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .school-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .school-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .school-info-right {
+    display: flex;
+    align-items: start;
+  }
+
+  .school-info-right .info-group {
+    width: 100%;
+    margin-bottom: 0;
   }
 
   .bundesland-display {
@@ -371,6 +419,7 @@
     border-radius: 12px;
     opacity: 0.7;
   }
+
   .bundesland-flag {
     margin-bottom: 0.5rem;
     line-height: 1;
@@ -417,6 +466,7 @@
     font-size: 0.85rem;
     font-weight: 500;
   }
+
   .profile-completion-action {
     margin-top: 1.5rem;
     padding: 1.5rem;
@@ -449,6 +499,8 @@
     align-items: center;
     gap: 0.5rem;
     justify-content: center;
+    margin: 0 auto;
+    max-width: 300px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }
@@ -539,6 +591,11 @@
     .form-row {
       flex-direction: column;
       gap: 0;
+    }
+
+    .school-info-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
     }
 
     .actions {
