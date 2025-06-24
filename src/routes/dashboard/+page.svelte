@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
+  import SubscriptionStatus from "$lib/components/SubscriptionStatus.svelte";
 
   let userName = "Max Mustermann";
   let userStats = {
@@ -198,9 +199,16 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          <span>KI-Tutor</span>
-        </button>
+          <span>KI-Tutor</span>        </button>
       </div>
+    </div>
+
+    <!-- Subscription Status -->
+    <div class="dashboard-card subscription-card">
+      <div class="card-header">
+        <h2>Abonnement Status</h2>
+      </div>
+      <SubscriptionStatus />
     </div>
   </div>
 </div>
@@ -334,11 +342,14 @@
     margin: 0;
     font-size: 0.875rem;
   }
-
   .content-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
+  }
+
+  .subscription-card {
+    grid-column: 1 / -1; /* Make subscription card span full width */
   }
 
   .dashboard-card {

@@ -2,9 +2,8 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 
 export const load: LayoutLoad = async ({ url, depends }) => {
-  depends("auth:user");
-  // List of protected routes
-  const protectedRoutes = ["/dashboard", "/users", "/settings"];
+  depends("auth:user");  // List of protected routes
+  const protectedRoutes = ["/dashboard", "/users", "/settings", "/subscription"];
 
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some((route) => url.pathname.startsWith(route));

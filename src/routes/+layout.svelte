@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
+  import { browser } from "$app/environment";
   import { onMount } from "svelte";
   import { user, userProfile, loading, authStore } from "$lib/auth";
 
@@ -14,8 +15,8 @@
     }
   }
 
-  // Redirect to auth if accessing protected route while not authenticated
-  $: if (!$loading && $page.data.isProtectedRoute && !$user) {
+  // Redirect to auth if accessing protected route while not authenticated (only on client side)
+  $: if (browser && !$loading && $page.data.isProtectedRoute && !$user) {
     goto("/auth");
   }
 </script>
@@ -32,9 +33,9 @@
     </div>
     <div class="nav-actions">
       {#if $loading}
-        <div class="nav-btn loading">Loading...</div>
-      {:else if $user}
+        <div class="nav-btn loading">Loading...</div>      {:else if $user}
         <a href="/dashboard" class="nav-btn dashboard">Dashboard</a>
+        <a href="/subscription" class="nav-btn subscription">Abonnement</a>
         <a href="/settings" class="nav-btn settings">Settings</a>
         <div class="user-info">
           <span class="user-email">
@@ -161,6 +162,16 @@
   }
   .nav-btn.dashboard:hover {
     background: #059669;
+  }
+
+  .nav-btn.subscription {
+    background: #8b5cf6;
+    color: white;
+    border: 2px solid transparent;
+  }
+
+  .nav-btn.subscription:hover {
+    background: #7c3aed;
   }
 
   .nav-btn.settings {

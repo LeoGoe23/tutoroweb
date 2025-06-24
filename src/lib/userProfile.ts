@@ -1,6 +1,7 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, type DocumentReference } from "firebase/firestore";
 import { db } from "./firebase";
 import type { User } from "firebase/auth";
+import type { UserSubscription } from "./types";
 
 export interface UserProfile {
   uid: string;
@@ -11,6 +12,7 @@ export interface UserProfile {
   photoURL?: string;
   createdAt: any;
   updatedAt: any;
+  subscription?: UserSubscription;
   preferences?: {
     language: string;
     theme: string;
@@ -43,9 +45,7 @@ export const userProfileService = {
     if (!userDoc.exists()) {
       const { displayName, email, photoURL } = user;
       const firstName = additionalData.firstName || displayName?.split(" ")[0] || "";
-      const lastName = additionalData.lastName || displayName?.split(" ").slice(1).join(" ") || "";
-
-      const userData: UserProfile = {
+      const lastName = additionalData.lastName || displayName?.split(" ").slice(1).join(" ") || "";      const userData: UserProfile = {
         uid: user.uid,
         email: email || "",
         displayName: displayName || `${firstName} ${lastName}`.trim(),
@@ -54,6 +54,12 @@ export const userProfileService = {
         photoURL: photoURL || undefined,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        subscription: {
+          tier: 'free',
+          status: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
         preferences: {
           language: "de",
           theme: "light",
@@ -141,6 +147,24 @@ export const userProfileService = {
       return true;
     } catch (error) {
       console.error("Error updating user preferences:", error);
+      throw error;
+    }
+  },
+
+  // Update user subscription
+  updateUserSubscription: async (uid: string, subscription: Partial<UserSubscription>) => {
+    try {
+      const userRef = doc(db, "users", uid);
+      await updateDoc(userRef, {
+        subscription: {
+          ...subscription,
+          updatedAt: new Date(),
+        },
+        updatedAt: serverTimestamp(),
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating user subscription:", error);
       throw error;
     }
   },
