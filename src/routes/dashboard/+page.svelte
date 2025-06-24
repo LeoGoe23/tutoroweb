@@ -10,11 +10,12 @@
     weeklyProgress: 85,
     streakDays: 7,
     completedLessons: 156,
-  };
-
-  // Update user name and stats when user profile is loaded
+  }; // Update user name and stats when user profile is loaded
   $: if ($userProfile) {
-    userName = $userProfile.displayName || $userProfile.firstName + " " + $userProfile.lastName || "User";
+    userName =
+      $userProfile.displayName ||
+      $userProfile.firstName + ($userProfile.lastName ? ` ${$userProfile.lastName}` : "") ||
+      "User";
     if ($userProfile.stats) {
       userStats = { ...userStats, ...$userProfile.stats };
     }
@@ -199,7 +200,8 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          <span>KI-Tutor</span>        </button>
+          <span>KI-Tutor</span>
+        </button>
       </div>
     </div>
 

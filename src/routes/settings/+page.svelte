@@ -29,18 +29,18 @@
     schulArt = $userProfile.schulArt || "";
     kursFach = $userProfile.kursFach || [];
   }
+
   async function handleUpdateProfile() {
-    if (!$user || !firstName || !lastName) {
-      errorMessage = "Bitte füllen Sie alle Pflichtfelder aus";
+    if (!$user || !firstName) {
+      errorMessage = "Bitte füllen Sie den Vornamen aus";
       return;
     }
 
     isSubmitting = true;
     successMessage = "";
     errorMessage = "";
-
     try {
-      const displayName = `${firstName} ${lastName}`; // Update Firestore profile (only personal info)
+      const displayName = firstName + (lastName ? ` ${lastName}` : ""); // Update Firestore profile (only personal info)
       await userProfileService.updateUserProfile($user.uid, {
         firstName,
         lastName,
@@ -88,10 +88,9 @@
             <label for="firstName">Vorname</label>
             <input type="text" id="firstName" bind:value={firstName} required disabled={isSubmitting} />
           </div>
-
           <div class="form-group">
-            <label for="lastName">Nachname</label>
-            <input type="text" id="lastName" bind:value={lastName} required disabled={isSubmitting} />
+            <label for="lastName">Nachname (optional)</label>
+            <input type="text" id="lastName" bind:value={lastName} disabled={isSubmitting} />
           </div>
         </div>
         <div class="form-group">

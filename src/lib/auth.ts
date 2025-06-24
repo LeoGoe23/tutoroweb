@@ -1,4 +1,4 @@
-import { writable, type Readable } from "svelte/store";
+import { writable } from "svelte/store";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -36,14 +36,14 @@ if (browser) {
 
         // If profile doesn't exist, create it (for existing users or edge cases)
         if (!profile) {
-          const displayName = firebaseUser.displayName || "";
+          const displayName = firebaseUser.displayName ?? "";
           const nameParts = displayName.split(" ");
           const firstName = nameParts[0] || "";
           const lastName = nameParts.slice(1).join(" ") || "";
 
           profile = await userProfileService.createUserProfile(firebaseUser, {
             firstName,
-            lastName,
+            lastName: lastName || undefined,
             displayName,
           });
         }
@@ -94,9 +94,9 @@ export const authStore = {
       // Create user profile in Firestore
       if (result.user) {
         await userProfileService.createUserProfile(result.user, {
-          firstName: firstName || "",
-          lastName: lastName || "",
-          displayName: displayName || `${firstName} ${lastName}`.trim(),
+          firstName: firstName ?? "",
+          lastName: lastName ?? undefined,
+          displayName: displayName ?? firstName + (lastName ? ` ${lastName}` : ""),
         });
       }
 
@@ -128,14 +128,13 @@ export const authStore = {
       // Create or update user profile in Firestore for Google users
       if (result.user) {
         // Extract name parts from Google profile
-        const displayName = result.user.displayName || "";
+        const displayName = result.user.displayName ?? "";
         const nameParts = displayName.split(" ");
-        const firstName = nameParts[0] || "";
-        const lastName = nameParts.slice(1).join(" ") || "";
-
+        const firstName = nameParts[0] ?? "";
+        const lastName = nameParts.slice(1).join(" ") || undefined;
         await userProfileService.createUserProfile(result.user, {
           firstName,
-          lastName,
+          lastName: lastName ?? undefined,
           displayName,
         });
       }

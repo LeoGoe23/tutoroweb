@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp, type DocumentReference } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import type { User } from "firebase/auth";
 import type { UserSubscription, Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "./types";
@@ -8,7 +8,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   firstName: string;
-  lastName: string;
+  lastName?: string;
   photoURL?: string;
   createdAt: any;
   updatedAt: any;
@@ -53,15 +53,15 @@ export const userProfileService = {
 
     if (!userDoc.exists()) {
       const { displayName, email, photoURL } = user;
-      const firstName = additionalData.firstName || displayName?.split(" ")[0] || "";
-      const lastName = additionalData.lastName || displayName?.split(" ").slice(1).join(" ") || "";
+      const firstName = additionalData.firstName ?? displayName?.split(" ")[0] ?? "";
+      const lastName = additionalData.lastName ?? displayName?.split(" ").slice(1).join(" ") ?? "";
       const userData: UserProfile = {
         uid: user.uid,
-        email: email || "",
-        displayName: displayName || `${firstName} ${lastName}`.trim(),
+        email: email ?? "",
+        displayName: displayName ?? firstName + (lastName ? ` ${lastName}` : ""),
         firstName,
-        lastName,
-        photoURL: photoURL || undefined,
+        lastName: lastName || undefined,
+        photoURL: photoURL ?? undefined,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         profileCompleted: false,

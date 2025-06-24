@@ -30,9 +30,8 @@
       authError.set("Bitte füllen Sie alle Felder aus");
       return;
     }
-
-    if (!isLoginTab && (!firstName || !lastName)) {
-      authError.set("Bitte geben Sie Ihren Vor- und Nachnamen ein");
+    if (!isLoginTab && !firstName) {
+      authError.set("Bitte geben Sie Ihren Vornamen ein");
       return;
     }
 
@@ -52,7 +51,7 @@
         await authStore.signIn(email, password);
         // Redirect will be handled by reactive statement above
       } else {
-        const displayName = `${firstName} ${lastName}`;
+        const displayName = firstName + (lastName ? ` ${lastName}` : "");
         await authStore.signUp(email, password, displayName, firstName, lastName);
         goto("/complete-profile");
       }
@@ -173,12 +172,11 @@
             />
           </div>
           <div class="form-group">
-            <label for="reg-lastname">Nachname</label>
+            <label for="reg-lastname">Nachname (optional)</label>
             <input
               type="text"
               id="reg-lastname"
               bind:value={lastName}
-              required
               placeholder="Mustermann"
               disabled={isSubmitting}
             />
