@@ -24,24 +24,45 @@
     margin: 2rem auto;
     padding: 2rem;
     text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    color: white;
   }
 
   h1 {
-    color: #333;
-    margin-bottom: 1rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   a {
-    color: #4f46e5;
+    color: #fbbf24;
     text-decoration: none;
-    margin: 0 0.5rem;
+    margin: 0 0.75rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    transition: all 0.3s ease;
+    display: inline-block;
   }
 
   a:hover {
-    text-decoration: underline;
+    background: rgba(251, 191, 36, 0.2);
+    border-color: #fbbf24;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    text-decoration: none;
   }
 </style>

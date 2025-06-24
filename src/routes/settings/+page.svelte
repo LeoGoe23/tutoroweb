@@ -113,7 +113,6 @@
             {bundesland || "Nicht angegeben"}
           </div>
         </div>
-
         <div class="info-group">
           <label>Interessensfächer</label>
           <div class="info-value">
@@ -127,6 +126,16 @@
               Keine Fächer ausgewählt
             {/if}
           </div>
+        </div>
+        <div class="profile-completion-action">
+          <button type="button" on:click={() => goto("/complete-profile?edit=true")} class="btn profile-edit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="m18.5 2.5 3 3L12 15l-4 1 1-4z" />
+            </svg>
+            Profil-Daten bearbeiten
+          </button>
+          <small>Ändern Sie Ihre Jahrgangsstufe, Bundesland und Interessensfächer</small>
         </div>
       </div>
 
@@ -285,6 +294,51 @@
     border-radius: 1rem;
     font-size: 0.85rem;
     font-weight: 500;
+  }
+  .profile-completion-action {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px solid #6366f1;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .profile-completion-action button {
+    margin-bottom: 0.75rem;
+  }
+
+  .profile-completion-action small {
+    color: #6b7280;
+    font-size: 0.85rem;
+    display: block;
+    font-weight: 500;
+  }
+
+  .btn.profile-edit {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn.profile-edit:hover {
+    background: linear-gradient(135deg, #5338f1 0%, #7c3aed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn.profile-edit svg {
+    flex-shrink: 0;
   }
 
   .checkbox-group {

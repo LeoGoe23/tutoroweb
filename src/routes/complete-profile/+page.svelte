@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
   import type { Jahrgangsstufe, Bundesland, KursFach } from "$lib/types";
@@ -12,13 +13,22 @@
   let isSubmitting = false;
   let error = "";
 
-  // Redirect if not authenticated or already completed
+  // Check if we're in edit mode
+  $: isEditMode = $page.url.searchParams.get("edit") === "true";
+
+  // Redirect if not authenticated or already completed (unless in edit mode)
   $: if (!$user) {
     goto("/auth");
   }
-
-  $: if ($userProfile?.profileCompleted) {
+  $: if ($userProfile?.profileCompleted && !isEditMode) {
     goto("/dashboard");
+  }
+
+  // Load existing data in edit mode
+  $: if (isEditMode && $userProfile) {
+    jahrgangsstufe = $userProfile.jahrgangsstufe || "";
+    bundesland = $userProfile.bundesland || "";
+    kursFach = $userProfile.kursFach || [];
   }
 
   // Handle form submission
@@ -35,19 +45,23 @@
     error = "";
 
     try {
-      if (!$user) return;      const updatedProfile = await userProfileService.completeUserProfile($user.uid, {
+      if (!$user) return;
+      const updatedProfile = await userProfileService.completeUserProfile($user.uid, {
         jahrgangsstufe: jahrgangsstufe as Jahrgangsstufe,
         bundesland: bundesland as Bundesland,
-        kursFach
-      });      // Update the user profile in the auth store
+        kursFach,
+      }); // Update the user profile in the auth store
       if (updatedProfile) {
         userProfile.set(updatedProfile);
-      }
+      } // Small delay to ensure store updates propagate
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Small delay to ensure store updates propagate
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      goto("/dashboard");
+      // Redirect based on mode
+      if (isEditMode) {
+        goto("/settings");
+      } else {
+        goto("/dashboard");
+      }
     } catch (err: any) {
       console.error("Profile completion error:", err);
       error = "Ein Fehler ist aufgetreten. Bitte versuche es erneut.";
@@ -68,9 +82,11 @@
         <img src="/svgs/logo.svg" alt="Tutoro Logo" class="logo" />
         <h1>Tutoro</h1>
       </div>
-      <h2>Profil vervollständigen</h2>
+      <h2>{isEditMode ? "Profil-Daten bearbeiten" : "Profil vervollständigen"}</h2>
       <p class="subtitle">
-        Erzähle uns ein wenig über dich, damit wir dir die beste Lernerfahrung bieten können.
+        {isEditMode
+          ? "Aktualisieren Sie Ihre Schul- und Interessensinformationen."
+          : "Erzähle uns ein wenig über dich, damit wir dir die beste Lernerfahrung bieten können."}
       </p>
     </div>
 
@@ -83,12 +99,7 @@
 
       <div class="form-group">
         <label for="jahrgangsstufe">Jahrgangsstufe *</label>
-        <select
-          id="jahrgangsstufe"
-          bind:value={jahrgangsstufe}
-          required
-          disabled={isSubmitting}
-        >
+        <select id="jahrgangsstufe" bind:value={jahrgangsstufe} required disabled={isSubmitting}>
           <option value="">Bitte wählen...</option>
           <option value="5">5. Klasse</option>
           <option value="6">6. Klasse</option>
@@ -106,12 +117,7 @@
 
       <div class="form-group">
         <label for="bundesland">Bundesland *</label>
-        <select
-          id="bundesland"
-          bind:value={bundesland}
-          required
-          disabled={isSubmitting}
-        >
+        <select id="bundesland" bind:value={bundesland} required disabled={isSubmitting}>
           <option value="">Bitte wählen...</option>
           <option value="Baden-Württemberg">Baden-Württemberg</option>
           <option value="Bayern">Bayern</option>
@@ -130,27 +136,26 @@
           <option value="Schleswig-Holstein">Schleswig-Holstein</option>
           <option value="Thüringen">Thüringen</option>
         </select>
-      </div>      <div class="form-group">
+      </div>
+      <div class="form-group">
         <fieldset>
           <legend>Interessensfächer * (mindestens eines wählen)</legend>
           <div class="subject-grid">
-            {#each ['Mathematik', 'Deutsch', 'Englisch', 'Französisch', 'Spanisch', 'Latein', 'Physik', 'Chemie', 'Biologie', 'Erdkunde', 'Geschichte', 'Politik', 'Wirtschaft', 'Religion', 'Ethik', 'Kunst', 'Musik', 'Sport', 'Informatik', 'Philosophie', 'Psychologie', 'Pädagogik', 'Sonstiges'] as fach}
+            {#each ["Mathematik", "Deutsch", "Englisch", "Französisch", "Spanisch", "Latein", "Physik", "Chemie", "Biologie", "Erdkunde", "Geschichte", "Politik", "Wirtschaft", "Religion", "Ethik", "Kunst", "Musik", "Sport", "Informatik", "Philosophie", "Psychologie", "Pädagogik", "Sonstiges"] as fach}
               <label class="subject-checkbox">
-                <input
-                  type="checkbox"
-                  value={fach}
-                  bind:group={kursFach}
-                  disabled={isSubmitting}
-                />
+                <input type="checkbox" value={fach} bind:group={kursFach} disabled={isSubmitting} />
                 <span>{fach}</span>
               </label>
             {/each}
           </div>
         </fieldset>
       </div>
-
       <button type="submit" class="complete-btn" disabled={isSubmitting}>
-        {isSubmitting ? "Profil wird vervollständigt..." : "Profil vervollständigen"}
+        {#if isEditMode}
+          {isSubmitting ? "Wird gespeichert..." : "Änderungen speichern"}
+        {:else}
+          {isSubmitting ? "Profil wird vervollständigt..." : "Profil vervollständigen"}
+        {/if}
       </button>
     </form>
   </div>
