@@ -503,6 +503,7 @@
     max-width: 300px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    margin-bottom: 10px;
   }
 
   .btn.profile-edit:hover {
