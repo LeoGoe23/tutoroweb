@@ -24,12 +24,12 @@
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-brand">
-      <div class="logo">
+      <a href="/" class="logo">
         <div class="logo-icon">
           <img src="/svgs/logo.svg" alt="Tutoro Logo" />
         </div>
         <span class="brand-name">Tutoro</span>
-      </div>
+      </a>
     </div>
     <div class="nav-actions">
       {#if $loading}
@@ -88,11 +88,17 @@
     display: flex;
     align-items: center;
   }
-
   .logo {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s ease;
+  }
+
+  .logo:hover {
+    opacity: 0.8;
   }
 
   .logo-icon {

@@ -40,7 +40,8 @@
     successMessage = "";
     errorMessage = "";
     try {
-      const displayName = firstName + (lastName ? ` ${lastName}` : ""); // Update Firestore profile (only personal info)
+      const displayName = firstName + (lastName ? ` ${lastName}` : "");
+      // Update Firestore profile (only personal info)
       await userProfileService.updateUserProfile($user.uid, {
         firstName,
         lastName,
