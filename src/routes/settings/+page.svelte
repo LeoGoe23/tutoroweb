@@ -105,7 +105,7 @@
         <div class="school-info-grid">
           <div class="school-info-left">
             <div class="info-group">
-              <label>Jahrgangsstufe</label>
+              <span class="info-label">Jahrgangsstufe</span>
               <div class="info-value compact">
                 {#if jahrgangsstufe === "Studium"}
                   Studium
@@ -120,7 +120,7 @@
             </div>
 
             <div class="info-group">
-              <label>Art der Schule</label>
+              <span class="info-label">Art der Schule</span>
               <div class="info-value compact">
                 {schulArt || "Nicht angegeben"}
               </div>
@@ -129,7 +129,7 @@
 
           <div class="school-info-right">
             <div class="info-group">
-              <label>Bundesland</label>
+              <span class="info-label">Bundesland</span>
               <div class="info-value bundesland-display">
                 {#if bundesland}
                   <div class="bundesland-card">
@@ -192,7 +192,7 @@
         </div>
 
         <div class="info-group">
-          <label>Interessensfächer</label>
+          <span class="info-label">Interessensfächer</span>
           <div class="info-value">
             {#if kursFach && kursFach.length > 0}
               <div class="subject-tags">
@@ -342,7 +342,7 @@
     margin-bottom: 1rem;
   }
 
-  .info-group label {
+  .info-group .info-label {
     display: block;
     margin-bottom: 0.5rem;
     color: #374151;
