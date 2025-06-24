@@ -13,8 +13,29 @@
   let bundesland: Bundesland | "" = "";
   let kursFach: KursFach[] = [];
   let isSubmitting = false;
-  let successMessage = "";
+  let successMessage = "";  
   let errorMessage = "";
+  
+  // Bundesland flag mapping
+  const bundeslandFlags = {
+    "Baden-Württemberg": "🏰",
+    "Bayern": "🥨", 
+    "Berlin": "🐻",
+    "Brandenburg": "🌲",
+    "Bremen": "⚓",
+    "Hamburg": "🚢",
+    "Hessen": "🍎",
+    "Mecklenburg-Vorpommern": "🏖️",
+    "Niedersachsen": "🐴",
+    "Nordrhein-Westfalen": "⚡",
+    "Rheinland-Pfalz": "🍷",
+    "Saarland": "⚒️",
+    "Sachsen": "🎭",
+    "Sachsen-Anhalt": "🏛️",
+    "Schleswig-Holstein": "🌊",
+    "Thüringen": "🌿"
+  };
+  
   // Load current profile data
   $: if ($userProfile) {
     firstName = $userProfile.firstName || "";
@@ -105,12 +126,24 @@
           <div class="info-value">
             {jahrgangsstufe || "Nicht angegeben"}
           </div>
-        </div>
-
-        <div class="info-group">
+        </div>        <div class="info-group">
           <label>Bundesland</label>
-          <div class="info-value">
-            {bundesland || "Nicht angegeben"}
+          <div class="info-value bundesland-display">
+            {#if bundesland}
+              <div class="bundesland-card">
+                <div class="bundesland-flag">
+                  {bundeslandFlags[bundesland] || "🇩🇪"}
+                </div>
+                <div class="bundesland-name">
+                  {bundesland}
+                </div>
+              </div>
+            {:else}
+              <div class="bundesland-placeholder">
+                <div class="bundesland-flag">🇩🇪</div>
+                <div class="bundesland-name">Nicht angegeben</div>
+              </div>
+            {/if}
           </div>
         </div>
         <div class="info-group">
@@ -271,7 +304,6 @@
     font-weight: 600;
     font-size: 0.9rem;
   }
-
   .info-value {
     padding: 0.75rem;
     background: #f9fafb;
@@ -279,6 +311,56 @@
     border-radius: 6px;
     color: #6b7280;
     font-size: 1rem;
+  }
+
+  .bundesland-display {
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+
+  .bundesland-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .bundesland-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+  }
+
+  .bundesland-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    opacity: 0.7;
+  }
+
+  .bundesland-flag {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  .bundesland-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: center;
+  }
+
+  .bundesland-placeholder .bundesland-name {
+    color: #6b7280;
   }
 
   .subject-tags {
