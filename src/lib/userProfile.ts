@@ -20,6 +20,7 @@ export interface UserProfile {
   bundesland?: Bundesland;
   schulArt?: SchulArt;
   kursFach?: KursFach[];
+  learningGoals?: string;
 
   subscription?: UserSubscription;
   preferences?: {
@@ -178,27 +179,42 @@ export const userProfileService = {
       console.error("Error updating user subscription:", error);
       throw error;
     }
-  },
-  // Complete user profile with school information
+  }, // Complete user profile with school information
   completeUserProfile: async (
     uid: string,
-    schoolInfo: {
+    profileData: {
+      firstName?: string;
+      lastName?: string;
       jahrgangsstufe: Jahrgangsstufe;
       bundesland: Bundesland;
       schulArt: SchulArt;
       kursFach: KursFach[];
+      learningGoals?: string;
     }
   ) => {
     try {
       const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, {
-        jahrgangsstufe: schoolInfo.jahrgangsstufe,
-        bundesland: schoolInfo.bundesland,
-        schulArt: schoolInfo.schulArt,
-        kursFach: schoolInfo.kursFach,
+      const updateData: any = {
+        jahrgangsstufe: profileData.jahrgangsstufe,
+        bundesland: profileData.bundesland,
+        schulArt: profileData.schulArt,
+        kursFach: profileData.kursFach,
         profileCompleted: true,
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      // Add optional fields if provided
+      if (profileData.firstName) {
+        updateData.firstName = profileData.firstName;
+      }
+      if (profileData.lastName) {
+        updateData.lastName = profileData.lastName;
+      }
+      if (profileData.learningGoals) {
+        updateData.learningGoals = profileData.learningGoals;
+      }
+
+      await updateDoc(userRef, updateData);
 
       // Return the updated profile
       return await userProfileService.getUserProfile(uid);

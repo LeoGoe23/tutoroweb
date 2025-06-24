@@ -226,16 +226,10 @@
     transform: scale(1.03);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
   }
-
   .nav-btn.loading {
     background: #6b7280;
     color: white;
     cursor: default;
-  }
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
   }
 
   .user-dropdown {

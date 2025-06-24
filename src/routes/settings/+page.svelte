@@ -205,15 +205,40 @@
             {/if}
           </div>
         </div>
-
         <div class="profile-completion-action">
-          <button type="button" on:click={() => goto("/complete-profile?edit=true")} class="btn profile-edit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="m18.5 2.5 3 3L12 15l-4 1 1-4z" />
-            </svg>
-            Profil-Daten bearbeiten
-          </button> <small>Ändern Sie Ihre Jahrgangsstufe, Art der Schule, Bundesland und Interessensfächer</small>
+          <div class="profile-edit-options">
+            <h3>Profil-Daten bearbeiten</h3>
+            <p class="options-description">
+              Ändern Sie Ihre Jahrgangsstufe, Art der Schule, Bundesland und Interessensfächer
+            </p>
+
+            <div class="edit-buttons">
+              <button
+                type="button"
+                on:click={() => goto("/complete-profile/guided?edit=true")}
+                class="btn profile-edit guided"
+              >
+                <div class="btn-content">
+                  <div class="btn-icon">🚀</div>
+                  <div class="btn-text">
+                    <span class="btn-title">Geführte Bearbeitung</span>
+                    <span class="btn-subtitle">Schritt-für-Schritt mit visueller Anleitung</span>
+                  </div>
+                </div>
+                <div class="btn-badge">Empfohlen</div>
+              </button>
+
+              <button type="button" on:click={() => goto("/complete-profile?edit=true")} class="btn profile-edit quick">
+                <div class="btn-content">
+                  <div class="btn-icon">⚡</div>
+                  <div class="btn-text">
+                    <span class="btn-title">Schnell-Bearbeitung</span>
+                    <span class="btn-subtitle">Alle Daten auf einer Seite</span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="section">
@@ -475,45 +500,123 @@
     border-radius: 12px;
     text-align: center;
   }
-
   .profile-completion-action button {
     margin-bottom: 0.75rem;
   }
 
-  .profile-completion-action small {
+  .profile-edit-options {
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+
+  .profile-edit-options h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem;
+  }
+
+  .options-description {
     color: #6b7280;
-    font-size: 0.85rem;
-    display: block;
-    font-weight: 500;
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+  }
+
+  .edit-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   .btn.profile-edit {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
-    border: none;
-    padding: 0.875rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.25rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    justify-content: center;
-    margin: 0 auto;
-    max-width: 300px;
+    gap: 0;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    margin-bottom: 10px;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    min-height: 120px;
   }
 
   .btn.profile-edit:hover {
-    background: linear-gradient(135deg, #5338f1 0%, #7c3aed 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   }
 
-  .btn.profile-edit svg {
-    flex-shrink: 0;
+  .btn.profile-edit.guided {
+    border-color: #7c3aed;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  }
+
+  .btn.profile-edit.guided:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.2);
+  }
+
+  .btn.profile-edit.quick {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+
+  .btn.profile-edit.quick:hover {
+    border-color: #9ca3af;
+    background: #f3f4f6;
+  }
+
+  .btn-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .btn-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .btn-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .btn-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1f2937;
+  }
+
+  .btn-subtitle {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.3;
+  }
+
+  .btn-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   }
 
   .checkbox-group {
@@ -598,9 +701,30 @@
       grid-template-columns: 1fr;
       gap: 1rem;
     }
-
     .actions {
       flex-direction: column;
+    }
+
+    .edit-buttons {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn.profile-edit {
+      padding: 1rem;
+      min-height: 100px;
+    }
+
+    .btn-icon {
+      font-size: 1.75rem;
+    }
+
+    .btn-title {
+      font-size: 0.9rem;
+    }
+
+    .btn-subtitle {
+      font-size: 0.75rem;
     }
 
     .subject-tags {

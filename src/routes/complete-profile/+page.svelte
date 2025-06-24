@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import { browser } from "$app/environment";
   import { page } from "$app/stores";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
@@ -13,17 +14,24 @@
   let kursFach: KursFach[] = [];
   let isSubmitting = false;
   let error = "";
-
   // Check if we're in edit mode
   $: isEditMode = $page.url.searchParams.get("edit") === "true";
 
-  // Redirect if not authenticated or already completed (unless in edit mode)
-  $: if (!$user) {
-    goto("/auth");
-  }
-  $: if ($userProfile?.profileCompleted && !isEditMode) {
-    goto("/dashboard");
-  }
+  // Handle navigation and data loading
+  onMount(() => {
+    // Redirect if not authenticated
+    if (!$user) {
+      goto("/auth");
+      return;
+    }
+
+    // Redirect if already completed (unless in edit mode)
+    if ($userProfile?.profileCompleted && !isEditMode) {
+      goto("/dashboard");
+      return;
+    }
+  });
+
   // Load existing data in edit mode
   $: if (isEditMode && $userProfile) {
     jahrgangsstufe = $userProfile.jahrgangsstufe || "";
@@ -88,6 +96,25 @@
           ? "Aktualisieren Sie Ihre Schul- und Interessensinformationen."
           : "Erzähle uns ein wenig über dich, damit wir dir die beste Lernerfahrung bieten können."}
       </p>
+
+      {#if !isEditMode}
+        <div class="setup-options">
+          <a href="/complete-profile/guided" class="setup-option guided">
+            <div class="option-icon">🚀</div>
+            <h3>Geführte Einrichtung</h3>
+            <p>Schritt-für-Schritt durch dein Profil mit visueller Anleitung</p>
+            <span class="option-badge">Empfohlen</span>
+          </a>
+          <div class="setup-option current">
+            <div class="option-icon">⚡</div>
+            <h3>Schnell-Einrichtung</h3>
+            <p>Alle Daten auf einer Seite eingeben</p>
+          </div>
+        </div>
+        <div class="divider">
+          <span>oder nutze die Schnell-Einrichtung</span>
+        </div>
+      {/if}
     </div>
 
     <form class="completion-form" on:submit|preventDefault={handleSubmit}>
@@ -247,12 +274,105 @@
     color: #1f2937;
     margin: 0 0 0.5rem 0;
   }
-
   .subtitle {
     color: #6b7280;
     font-size: 0.95rem;
     line-height: 1.5;
     margin: 0;
+  }
+
+  .setup-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .setup-option {
+    padding: 1.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .setup-option.guided {
+    border-color: #7c3aed;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  }
+
+  .setup-option.guided:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(124, 58, 237, 0.2);
+    border-color: #7c3aed;
+  }
+
+  .setup-option.current {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+
+  .option-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .setup-option h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem;
+  }
+
+  .setup-option p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .option-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e5e7eb;
+    z-index: 1;
+  }
+
+  .divider span {
+    background: white;
+    padding: 0 1rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+    position: relative;
+    z-index: 2;
   }
 
   .completion-form {
@@ -368,11 +488,23 @@
     margin-bottom: 0.5rem;
     padding: 0;
   }
-
   @media (max-width: 640px) {
     .profile-completion-card {
       padding: 2rem 1.5rem;
       margin: 1rem;
+    }
+
+    .setup-options {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .setup-option {
+      padding: 1.25rem 1rem;
+    }
+
+    .option-icon {
+      font-size: 1.75rem;
     }
 
     .subject-grid {
