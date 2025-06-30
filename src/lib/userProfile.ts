@@ -28,20 +28,6 @@ export interface UserProfile {
     theme: string;
     notifications: boolean;
   };
-  stats?: {
-    totalSessions: number;
-    weeklyProgress: number;
-    streakDays: number;
-    completedLessons: number;
-  };
-  subjects?: string[];
-  tutorInfo?: {
-    isTutor: boolean;
-    specializations?: string[];
-    hourlyRate?: number;
-    rating?: number;
-    totalStudents?: number;
-  };
 }
 
 export const userProfileService = {
@@ -77,16 +63,7 @@ export const userProfileService = {
           theme: "light",
           notifications: true,
         },
-        stats: {
-          totalSessions: 0,
-          weeklyProgress: 0,
-          streakDays: 0,
-          completedLessons: 0,
-        },
-        subjects: [],
-        tutorInfo: {
-          isTutor: false,
-        },
+        // entfernt: stats, subjects, tutorInfo
         ...additionalData,
       };
 
@@ -129,36 +106,6 @@ export const userProfileService = {
       return true;
     } catch (error) {
       console.error("Error updating user profile:", error);
-      throw error;
-    }
-  },
-
-  // Update user stats
-  updateUserStats: async (uid: string, stats: Partial<UserProfile["stats"]>) => {
-    try {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, {
-        stats: stats,
-        updatedAt: serverTimestamp(),
-      });
-      return true;
-    } catch (error) {
-      console.error("Error updating user stats:", error);
-      throw error;
-    }
-  },
-
-  // Update user preferences
-  updateUserPreferences: async (uid: string, preferences: Partial<UserProfile["preferences"]>) => {
-    try {
-      const userRef = doc(db, "users", uid);
-      await updateDoc(userRef, {
-        preferences: preferences,
-        updatedAt: serverTimestamp(),
-      });
-      return true;
-    } catch (error) {
-      console.error("Error updating user preferences:", error);
       throw error;
     }
   },
