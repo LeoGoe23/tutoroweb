@@ -1,7 +1,10 @@
-import type { PageLoad } from './$types';
+import type { PageLoad } from "./guided/$types";
 
 export const load: PageLoad = async ({ url }) => {
-  // This page should only be accessible to authenticated users
-  // The redirect logic is handled in the component itself via reactive statements
-  return {};
+  // Mark as protected route
+  return {
+    isProtectedRoute: true,
+    isGuidedSetup: true,
+    edit: url.searchParams.get("edit") === "true",
+  };
 };

@@ -1,20 +1,26 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { browser } from "$app/environment";
   import { page } from "$app/stores";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
   import type { Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "$lib/types";
 
+  // Step management
+  let currentStep = 1;
+  const totalSteps = 5;
+
   // Form state
+  let firstName = "";
+  let lastName = "";
   let jahrgangsstufe: Jahrgangsstufe | "" = "";
   let bundesland: Bundesland | "" = "";
   let schulArt: SchulArt | "" = "";
   let kursFach: KursFach[] = [];
+  let learningGoals = "";
+
   let isSubmitting = false;
-  let error = "";
-  // Check if we're in edit mode
+  let error = ""; // Check if we're in edit mode
   $: isEditMode = $page.url.searchParams.get("edit") === "true";
 
   // Handle navigation and data loading
@@ -30,21 +36,62 @@
       goto("/dashboard");
       return;
     }
+
+    // Load existing data in edit mode
+    if (isEditMode && $userProfile) {
+      firstName = $userProfile.firstName || "";
+      lastName = $userProfile.lastName || "";
+      jahrgangsstufe = $userProfile.jahrgangsstufe || "";
+      bundesland = $userProfile.bundesland || "";
+      schulArt = $userProfile.schulArt || "";
+      kursFach = $userProfile.kursFach || [];
+      learningGoals = $userProfile.learningGoals || "";
+    }
   });
 
-  // Load existing data in edit mode
-  $: if (isEditMode && $userProfile) {
-    jahrgangsstufe = $userProfile.jahrgangsstufe || "";
-    bundesland = $userProfile.bundesland || "";
-    schulArt = $userProfile.schulArt || "";
-    kursFach = $userProfile.kursFach || [];
+  // Progress calculation
+  $: progress = (currentStep / totalSteps) * 100; // Step validation
+  let canProceed: Record<number, boolean>;
+  $: {
+    canProceed = {
+      1: firstName.trim() !== "" && lastName.trim() !== "",
+      2: jahrgangsstufe !== "" && schulArt !== "",
+      3: bundesland !== "",
+      4: kursFach.length > 0,
+      5: true,
+    };
+  }
+
+  // Navigation functions
+  function nextStep() {
+    if (currentStep < totalSteps && canProceed[currentStep]) {
+      currentStep++;
+      error = "";
+    }
+  }
+
+  function previousStep() {
+    if (currentStep > 1) {
+      currentStep--;
+      error = "";
+    }
+  }
+
+  function goToStep(step: number) {
+    // Only allow going back or to the next step if current step is valid
+    if (step <= currentStep || (step === currentStep + 1 && canProceed[currentStep])) {
+      currentStep = step;
+      error = "";
+    }
   }
 
   // Handle form submission
   async function handleSubmit() {
-    if (isSubmitting) return; // Validation
-    if (!jahrgangsstufe || !schulArt || !bundesland || kursFach.length === 0) {
-      error = "Bitte fülle alle Felder aus und wähle mindestens ein Fach.";
+    if (isSubmitting) return;
+
+    // Validate all required fields
+    if (!firstName.trim() || !lastName.trim() || !jahrgangsstufe || !schulArt || !bundesland || kursFach.length === 0) {
+      error = "Bitte fülle alle erforderlichen Felder aus.";
       return;
     }
 
@@ -53,15 +100,23 @@
 
     try {
       if (!$user) return;
+
       const updatedProfile = await userProfileService.completeUserProfile($user.uid, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         jahrgangsstufe: jahrgangsstufe as Jahrgangsstufe,
         bundesland: bundesland as Bundesland,
         schulArt: schulArt as SchulArt,
         kursFach,
-      }); // Update the user profile in the auth store
+        learningGoals: learningGoals.trim() || undefined,
+      });
+
+      // Update the user profile in the auth store
       if (updatedProfile) {
         userProfile.set(updatedProfile);
-      } // Small delay to ensure store updates propagate
+      }
+
+      // Small delay to ensure store updates propagate
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Redirect based on mode
@@ -77,324 +132,504 @@
       isSubmitting = false;
     }
   }
+
+  // Subject categories for better organization
+  const subjectCategories = {
+    Sprachen: ["Deutsch", "Englisch", "Französisch", "Spanisch", "Latein"],
+    MINT: ["Mathematik", "Physik", "Chemie", "Biologie", "Informatik"],
+    Gesellschaft: ["Geschichte", "Erdkunde", "Politik", "Wirtschaft", "Religion", "Ethik", "Philosophie"],
+    "Kreativ & Sport": ["Kunst", "Musik", "Sport"],
+    Weitere: ["Psychologie", "Pädagogik", "Sonstiges"],
+  };
 </script>
 
 <svelte:head>
-  <title>Profil vervollständigen - Tutoro</title>
+  <title>Geführte Profil-Einrichtung - Tutoro</title>
 </svelte:head>
 
-<div class="profile-completion-container">
-  <div class="profile-completion-card">
-    <div class="header">
+<div class="guided-setup-container">
+  <!-- Progress Header -->
+  <header class="progress-header">
+    <div class="header-content">
       <div class="logo-section">
         <img src="/svgs/logo.svg" alt="Tutoro Logo" class="logo" />
-        <h1>Tutoro</h1>
+        <span class="brand-name">Tutoro</span>
       </div>
-      <h2>{isEditMode ? "Profil-Daten bearbeiten" : "Profil vervollständigen"}</h2>
-      <p class="subtitle">
-        {isEditMode
-          ? "Aktualisieren Sie Ihre Schul- und Interessensinformationen."
-          : "Erzähle uns ein wenig über dich, damit wir dir die beste Lernerfahrung bieten können."}
-      </p>
-
-      {#if !isEditMode}
-        <div class="setup-options">
-          <a href="/complete-profile/guided" class="setup-option guided">
-            <div class="option-icon">🚀</div>
-            <h3>Geführte Einrichtung</h3>
-            <p>Schritt-für-Schritt durch dein Profil mit visueller Anleitung</p>
-            <span class="option-badge">Empfohlen</span>
-          </a>
-          <div class="setup-option current">
-            <div class="option-icon">⚡</div>
-            <h3>Schnell-Einrichtung</h3>
-            <p>Alle Daten auf einer Seite eingeben</p>
-          </div>
+      <div class="progress-section">
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: {progress}%"></div>
         </div>
-        <div class="divider">
-          <span>oder nutze die Schnell-Einrichtung</span>
-        </div>
-      {/if}
+        <span class="progress-text">Schritt {currentStep} von {totalSteps}</span>
+      </div>
     </div>
+  </header>
 
-    <form class="completion-form" on:submit|preventDefault={handleSubmit}>
-      {#if error}
-        <div class="error-message">
-          {error}
-        </div>
-      {/if}
-      <div class="form-group">
-        <label for="jahrgangsstufe">Jahrgangsstufe *</label>
-        <select id="jahrgangsstufe" bind:value={jahrgangsstufe} required disabled={isSubmitting}>
-          <option value="">Bitte wählen...</option>
-          <option value="5">5. Klasse</option>
-          <option value="6">6. Klasse</option>
-          <option value="7">7. Klasse</option>
-          <option value="8">8. Klasse</option>
-          <option value="9">9. Klasse</option>
-          <option value="10">10. Klasse</option>
-          <option value="11">11. Klasse</option>
-          <option value="12">12. Klasse</option>
-          <option value="13">13. Klasse</option>
-          <option value="Studium">Studium</option>
-          <option value="Erwachsenenbildung">Erwachsenenbildung</option>
-        </select>
+  <!-- Main Content -->
+  <main class="setup-main">
+    <div class="step-container">
+      <!-- Step Navigation Dots -->
+      <div class="step-dots">
+        {#each Array(totalSteps) as _, i}
+          <button
+            class="step-dot"
+            class:active={i + 1 === currentStep}
+            class:completed={i + 1 < currentStep}
+            class:available={i + 1 <= currentStep || canProceed[i]}
+            on:click={() => goToStep(i + 1)}
+            disabled={i + 1 > currentStep && !canProceed[i]}
+          >
+            {#if i + 1 < currentStep}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20,6 9,17 4,12"></polyline>
+              </svg>
+            {:else}
+              {i + 1}
+            {/if}
+          </button>
+        {/each}
       </div>
 
-      <div class="form-group">
-        <label for="schulart">Art der Schule *</label>
-        <select id="schulart" bind:value={schulArt} required disabled={isSubmitting}>
-          <option value="">Bitte wählen...</option>
-          <option value="Grundschule">Grundschule</option>
-          <option value="Hauptschule">Hauptschule</option>
-          <option value="Realschule">Realschule</option>
-          <option value="Gesamtschule">Gesamtschule</option>
-          <option value="Gymnasium">Gymnasium</option>
-          <option value="Berufsschule">Berufsschule</option>
-          <option value="Berufsoberschule">Berufsoberschule</option>
-          <option value="Fachoberschule">Fachoberschule</option>
-          <option value="Fachhochschule">Fachhochschule</option>
-          <option value="Universität">Universität</option>
-          <option value="Privatschule">Privatschule</option>
-          <option value="Waldorfschule">Waldorfschule</option>
-          <option value="Montessori-Schule">Montessori-Schule</option>
-          <option value="Internationale Schule">Internationale Schule</option>
-          <option value="Sonstiges">Sonstiges</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="bundesland">Bundesland *</label>
-        <select id="bundesland" bind:value={bundesland} required disabled={isSubmitting}>
-          <option value="">Bitte wählen...</option>
-          <option value="Baden-Württemberg">Baden-Württemberg</option>
-          <option value="Bayern">Bayern</option>
-          <option value="Berlin">Berlin</option>
-          <option value="Brandenburg">Brandenburg</option>
-          <option value="Bremen">Bremen</option>
-          <option value="Hamburg">Hamburg</option>
-          <option value="Hessen">Hessen</option>
-          <option value="Mecklenburg-Vorpommern">Mecklenburg-Vorpommern</option>
-          <option value="Niedersachsen">Niedersachsen</option>
-          <option value="Nordrhein-Westfalen">Nordrhein-Westfalen</option>
-          <option value="Rheinland-Pfalz">Rheinland-Pfalz</option>
-          <option value="Saarland">Saarland</option>
-          <option value="Sachsen">Sachsen</option>
-          <option value="Sachsen-Anhalt">Sachsen-Anhalt</option>
-          <option value="Schleswig-Holstein">Schleswig-Holstein</option>
-          <option value="Thüringen">Thüringen</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <fieldset>
-          <legend>Interessensfächer * (mindestens eines wählen)</legend>
-          <div class="subject-grid">
-            {#each ["Mathematik", "Deutsch", "Englisch", "Französisch", "Spanisch", "Latein", "Physik", "Chemie", "Biologie", "Erdkunde", "Geschichte", "Politik", "Wirtschaft", "Religion", "Ethik", "Kunst", "Musik", "Sport", "Informatik", "Philosophie", "Psychologie", "Pädagogik", "Sonstiges"] as fach}
-              <label class="subject-checkbox">
-                <input type="checkbox" value={fach} bind:group={kursFach} disabled={isSubmitting} />
-                <span>{fach}</span>
-              </label>
-            {/each}
+      <!-- Step Content -->
+      <div class="step-content">
+        {#if currentStep === 1}
+          <div class="step-header">
+            <h1>Willkommen bei Tutoro! 👋</h1>
+            <p>Lass uns dich kennenlernen. Wie heißt du?</p>
           </div>
-        </fieldset>
-      </div>
-      <button type="submit" class="complete-btn" disabled={isSubmitting}>
-        {#if isEditMode}
-          {isSubmitting ? "Wird gespeichert..." : "Änderungen speichern"}
-        {:else}
-          {isSubmitting ? "Profil wird vervollständigt..." : "Profil vervollständigen"}
+
+          <div class="form-content">
+            <div class="name-fields">
+              <div class="form-group">
+                <label for="firstName">Vorname *</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  bind:value={firstName}
+                  placeholder="Dein Vorname"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="lastName">Nachname *</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  bind:value={lastName}
+                  placeholder="Dein Nachname"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        {:else if currentStep === 2}
+          <div class="step-header">
+            <h1>Deine Schullaufbahn 🎓</h1>
+            <p>Erzähle uns, in welcher Jahrgangsstufe du bist und welche Schulart du besuchst.</p>
+          </div>
+
+          <div class="form-content">
+            <div class="form-group">
+              <label for="jahrgangsstufe">Jahrgangsstufe *</label>
+              <select id="jahrgangsstufe" bind:value={jahrgangsstufe} class="form-select" required>
+                <option value="">Wähle deine Jahrgangsstufe</option>
+                <option value="5">5. Klasse</option>
+                <option value="6">6. Klasse</option>
+                <option value="7">7. Klasse</option>
+                <option value="8">8. Klasse</option>
+                <option value="9">9. Klasse</option>
+                <option value="10">10. Klasse</option>
+                <option value="11">11. Klasse</option>
+                <option value="12">12. Klasse</option>
+                <option value="13">13. Klasse</option>
+                <option value="Studium">Studium</option>
+                <option value="Erwachsenenbildung">Erwachsenenbildung</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="schulArt">Schulart *</label>
+              <select id="schulArt" bind:value={schulArt} class="form-select" required>
+                <option value="">Wähle deine Schulart</option>
+                <option value="Grundschule">Grundschule</option>
+                <option value="Hauptschule">Hauptschule</option>
+                <option value="Realschule">Realschule</option>
+                <option value="Gesamtschule">Gesamtschule</option>
+                <option value="Gymnasium">Gymnasium</option>
+                <option value="Berufsschule">Berufsschule</option>
+                <option value="Berufsoberschule">Berufsoberschule</option>
+                <option value="Fachoberschule">Fachoberschule</option>
+                <option value="Fachhochschule">Fachhochschule</option>
+                <option value="Universität">Universität</option>
+                <option value="Privatschule">Privatschule</option>
+                <option value="Waldorfschule">Waldorfschule</option>
+                <option value="Montessori-Schule">Montessori-Schule</option>
+                <option value="Internationale Schule">Internationale Schule</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
+            </div>
+          </div>
+        {:else if currentStep === 3}
+          <div class="step-header">
+            <h1>Dein Bundesland 🗺️</h1>
+            <p>In welchem Bundesland gehst du zur Schule?</p>
+          </div>
+
+          <div class="form-content">
+            <div class="bundesland-grid">
+              {#each ["Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern", "Niedersachsen", "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen", "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen"] as land}
+                <button
+                  type="button"
+                  class="bundesland-option"
+                  class:selected={bundesland === land}
+                  on:click={() => (bundesland = land as Bundesland)}
+                >
+                  <img
+                    src="/countries/german_counties/{land
+                      .toLowerCase()
+                      .replaceAll('ü', 'ue')
+                      .replaceAll('ä', 'ae')
+                      .replaceAll('ö', 'oe')
+                      .replaceAll(' ', '-')}.svg"
+                    alt={land}
+                    class="bundesland-icon"
+                  />
+                  <span>{land}</span>
+                </button>
+              {/each}
+            </div>
+          </div>
+        {:else if currentStep === 4}
+          <div class="step-header">
+            <h1>Deine Lieblingsfächer 📚</h1>
+            <p>Wähle die Fächer aus, für die du Nachhilfe suchst oder die dich interessieren.</p>
+          </div>
+
+          <div class="form-content">
+            <div class="subjects-container">
+              {#each Object.entries(subjectCategories) as [category, subjects]}
+                <div class="subject-category">
+                  <h3 class="category-title">{category}</h3>
+                  <div class="subject-chips">
+                    {#each subjects as subject}
+                      <button
+                        type="button"
+                        class="subject-chip"
+                        class:selected={kursFach.includes(subject as KursFach)}
+                        on:click={() => {
+                          const subjectAsKursFach = subject as KursFach;
+                          if (kursFach.includes(subjectAsKursFach)) {
+                            kursFach = kursFach.filter((f) => f !== subjectAsKursFach);
+                          } else {
+                            kursFach = [...kursFach, subjectAsKursFach];
+                          }
+                        }}
+                      >
+                        {subject}
+                      </button>
+                    {/each}
+                  </div>
+                </div>
+              {/each}
+            </div>
+            <div class="selected-count">
+              {kursFach.length} Fächer ausgewählt
+            </div>
+          </div>
+        {:else if currentStep === 5}
+          <div class="step-header">
+            <h1>Deine Lernziele 🎯</h1>
+            <p>Was möchtest du erreichen? (Optional, aber hilft uns dabei, dir bessere Inhalte zu zeigen)</p>
+          </div>
+
+          <div class="form-content">
+            <div class="form-group">
+              <label for="learningGoals">Beschreibe deine Ziele</label>
+              <textarea
+                id="learningGoals"
+                bind:value={learningGoals}
+                placeholder="z.B. Meine Noten in Mathematik verbessern, mich auf das Abitur vorbereiten, ein bestimmtes Thema verstehen..."
+                class="form-textarea"
+                rows="4"
+              ></textarea>
+            </div>
+
+            <div class="goals-suggestions">
+              <p class="suggestions-title">Häufige Ziele:</p>
+              <div class="suggestion-chips">
+                {#each ["Noten verbessern", "Abitur-Vorbereitung", "Nachhilfe geben", "Neue Fächer lernen", "Verständnis vertiefen"] as suggestion}
+                  <button
+                    type="button"
+                    class="suggestion-chip"
+                    on:click={() => {
+                      if (!learningGoals.includes(suggestion)) {
+                        learningGoals = learningGoals ? `${learningGoals}, ${suggestion}` : suggestion;
+                      }
+                    }}
+                  >
+                    {suggestion}
+                  </button>
+                {/each}
+              </div>
+            </div>
+          </div>
         {/if}
-      </button>
-    </form>
-  </div>
+
+        <!-- Error Message -->
+        {#if error}
+          <div class="error-message">
+            {error}
+          </div>
+        {/if}
+
+        <!-- Navigation Buttons -->
+        <div class="step-navigation">
+          {#if currentStep > 1}
+            <button type="button" class="nav-btn secondary" on:click={previousStep}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+              Zurück
+            </button>
+          {/if}
+
+          <div class="nav-spacer"></div>
+
+          {#if currentStep < totalSteps}
+            <button type="button" class="nav-btn primary" disabled={!canProceed[currentStep]} on:click={nextStep}>
+              Weiter
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          {:else}
+            <button
+              type="button"
+              class="nav-btn primary complete"
+              disabled={isSubmitting || !canProceed[currentStep]}
+              on:click={handleSubmit}
+            >
+              {#if isSubmitting}
+                <svg
+                  class="loading-spinner"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Wird gespeichert...
+              {:else}
+                {isEditMode ? "Änderungen speichern" : "Profil vervollständigen"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+              {/if}
+            </button>
+          {/if}
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <style>
-  .profile-completion-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+  :global(body) {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .guided-setup-container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+  }
+  /* Progress Header */
+  .progress-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+
+  .header-content {
+    max-width: 800px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-  }
-
-  .profile-completion-card {
-    background: white;
-    border-radius: 1.5rem;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes slideInUp {
-    0% {
-      opacity: 0;
-      transform: translateY(30px) scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 2rem;
+    justify-content: space-between;
   }
 
   .logo-section {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.75rem;
-    margin-bottom: 1rem;
   }
 
   .logo {
-    height: 2.5rem;
-    width: auto;
+    width: 32px;
+    height: 32px;
   }
 
-  .logo-section h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #a855f7, #7c3aed);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 0;
-  }
-
-  .header h2 {
+  .brand-name {
     font-size: 1.5rem;
     font-weight: 700;
     color: #1f2937;
-    margin: 0 0 0.5rem 0;
-  }
-  .subtitle {
-    color: #6b7280;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0;
   }
 
-  .setup-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .progress-section {
+    display: flex;
+    align-items: center;
     gap: 1rem;
-    margin: 2rem 0 1.5rem;
   }
 
-  .setup-option {
-    padding: 1.5rem 1rem;
+  .progress-bar-container {
+    width: 200px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4b5563;
+  } /* Main Setup Area */
+  .setup-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    padding-top: 8rem; /* Add space for fixed header */
+    overflow-y: auto;
+    max-height: calc(100vh - 6rem); /* Account for header */
+  }
+
+  .step-container {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 700px;
+    overflow: hidden;
+  }
+
+  /* Step Dots Navigation */
+  .step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem 2rem 1rem;
+    background: #f8fafc;
+  }
+
+  .step-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     border: 2px solid #e5e7eb;
-    border-radius: 1rem;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #6b7280;
+    cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-    cursor: pointer;
   }
 
-  .setup-option.guided {
-    border-color: #7c3aed;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+  .step-dot:hover:not(:disabled) {
+    transform: scale(1.05);
+    border-color: #667eea;
   }
 
-  .setup-option.guided:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 25px rgba(124, 58, 237, 0.2);
-    border-color: #7c3aed;
+  .step-dot.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
   }
 
-  .setup-option.current {
-    background: #f3f4f6;
-    border-color: #d1d5db;
+  .step-dot.completed {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
   }
 
-  .option-icon {
+  .step-dot:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Step Content */
+  .step-content {
+    padding: 2rem 3rem 3rem;
+  }
+
+  .step-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .step-header h1 {
     font-size: 2rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .setup-option h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #1f2937;
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.75rem;
   }
 
-  .setup-option p {
-    font-size: 0.85rem;
+  .step-header p {
+    font-size: 1.1rem;
     color: #6b7280;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.6;
   }
 
-  .option-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .form-content {
+    max-width: 500px;
+    margin: 0 auto;
   }
 
-  .divider {
-    text-align: center;
-    margin: 1.5rem 0;
-    position: relative;
-  }
-
-  .divider::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: #e5e7eb;
-    z-index: 1;
-  }
-
-  .divider span {
-    background: white;
-    padding: 0 1rem;
-    color: #6b7280;
-    font-size: 0.85rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .completion-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
+  /* Form Elements */
   .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .form-group label {
+    display: block;
     font-weight: 600;
     color: #374151;
-    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
   }
 
-  .form-group select {
-    padding: 0.75rem 1rem;
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 1rem;
     border: 2px solid #e5e7eb;
     border-radius: 0.75rem;
     font-size: 1rem;
@@ -402,114 +637,333 @@
     background: white;
   }
 
-  .form-group select:focus {
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
     outline: none;
-    border-color: #a855f7;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
 
-  .subject-grid {
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+  }
+
+  .name-fields {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.75rem;
-    max-height: 200px;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Bundesland Grid */
+  .bundesland-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    max-height: 400px;
     overflow-y: auto;
     padding: 0.5rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.75rem;
-    background: #fafafa;
   }
 
-  .subject-checkbox {
+  .bundesland-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .bundesland-option:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .bundesland-option.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .bundesland-icon {
+    width: 32px;
+    height: 32px;
+    filter: grayscale(100%);
+    transition: filter 0.2s ease;
+  }
+
+  .bundesland-option.selected .bundesland-icon {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Subjects */
+  .subjects-container {
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  .subject-category {
+    margin-bottom: 2rem;
+  }
+
+  .category-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.85rem;
+  }
+
+  .category-title::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    background: #667eea;
+    border-radius: 50%;
+  }
+
+  .subject-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .subject-chip {
+    padding: 0.75rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 2rem;
+    background: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 0.25rem;
-    border-radius: 0.5rem;
+    font-weight: 500;
+    color: #374151;
   }
 
-  .subject-checkbox:hover {
-    background: #f3f4f6;
+  .subject-chip:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
   }
 
-  .subject-checkbox input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
-    accent-color: #a855f7;
-  }
-
-  .complete-btn {
-    background: linear-gradient(135deg, #a855f7, #8b5cf6);
+  .subject-chip.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
     color: white;
-    border: none;
-    padding: 0.875rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .selected-count {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f0f9ff;
     border-radius: 0.75rem;
-    font-size: 1rem;
+    color: #0369a1;
     font-weight: 600;
+  }
+
+  /* Goals Suggestions */
+  .goals-suggestions {
+    margin-top: 1.5rem;
+  }
+
+  .suggestions-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+
+  .suggestion-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .suggestion-chip {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 1.5rem;
+    background: #f9fafb;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: #6b7280;
   }
 
-  .complete-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+  .suggestion-chip:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
   }
 
-  .complete-btn:disabled {
-    opacity: 0.7;
+  /* Navigation */
+  .step-navigation {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .nav-spacer {
+    flex: 1;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
   }
 
+  .nav-btn.secondary {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 2px solid transparent;
+  }
+
+  .nav-btn.secondary:hover:not(:disabled) {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  .nav-btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .nav-btn.primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .nav-btn.complete {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  }
+
+  .nav-btn.complete:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Loading Spinner */
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Error Message */
   .error-message {
     background: #fef2f2;
     border: 1px solid #fecaca;
     color: #dc2626;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border-radius: 0.75rem;
-    font-size: 0.9rem;
+    margin-top: 1rem;
     text-align: center;
+    font-weight: 500;
   }
 
-  fieldset {
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  legend {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    padding: 0;
-  }
-  @media (max-width: 640px) {
-    .profile-completion-card {
-      padding: 2rem 1.5rem;
-      margin: 1rem;
+  /* Responsive */
+  @media (max-width: 768px) {
+    .progress-header {
+      padding: 1rem;
     }
 
-    .setup-options {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
+    .header-content {
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    .setup-option {
-      padding: 1.25rem 1rem;
+    .progress-bar-container {
+      width: 150px;
+    }
+    .setup-main {
+      padding: 1rem;
+      padding-top: 9rem; /* Increased padding for mobile with fixed header */
+      max-height: calc(100vh - 7rem); /* Adjust for mobile header */
     }
 
-    .option-icon {
+    .step-content {
+      padding: 1.5rem 2rem 2rem;
+    }
+
+    .step-header h1 {
       font-size: 1.75rem;
     }
 
-    .subject-grid {
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      max-height: 150px;
+    .name-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .bundesland-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .step-dots {
+      padding: 1.5rem 1rem 1rem;
+      gap: 0.75rem;
+    }
+
+    .step-dot {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+
+    .nav-btn {
+      padding: 0.875rem 1.5rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .step-content {
+      padding: 1rem 1.5rem 1.5rem;
+    }
+
+    .bundesland-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .subject-chips {
+      gap: 0.5rem;
+    }
+
+    .subject-chip {
+      padding: 0.625rem 1rem;
+      font-size: 0.9rem;
     }
   }
 </style>

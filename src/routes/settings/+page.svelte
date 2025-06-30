@@ -229,16 +229,6 @@
                 </div>
                 <div class="btn-badge">Empfohlen</div>
               </button>
-
-              <button type="button" on:click={() => goto("/complete-profile?edit=true")} class="btn profile-edit quick">
-                <div class="btn-content">
-                  <div class="btn-icon">⚡</div>
-                  <div class="btn-text">
-                    <span class="btn-title">Schnell-Bearbeitung</span>
-                    <span class="btn-subtitle">Alle Daten auf einer Seite</span>
-                  </div>
-                </div>
-              </button>
             </div>
           </div>
         </div>
@@ -566,16 +556,6 @@
   .btn.profile-edit.guided:hover {
     border-color: #7c3aed;
     box-shadow: 0 8px 25px rgba(124, 58, 237, 0.2);
-  }
-
-  .btn.profile-edit.quick {
-    border-color: #d1d5db;
-    background: #f9fafb;
-  }
-
-  .btn.profile-edit.quick:hover {
-    border-color: #9ca3af;
-    background: #f3f4f6;
   }
 
   .btn-content {
