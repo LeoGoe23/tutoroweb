@@ -28,6 +28,7 @@ export interface UserProfile {
     theme: string;
     notifications: boolean;
   };
+  userRole: "normal" | "parent" | "child";
 }
 
 export const userProfileService = {
@@ -63,7 +64,7 @@ export const userProfileService = {
           theme: "light",
           notifications: true,
         },
-        // entfernt: stats, subjects, tutorInfo
+        userRole: "normal", // Default-Wert
         ...additionalData,
       };
 
