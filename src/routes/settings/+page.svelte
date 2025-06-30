@@ -423,15 +423,19 @@
     flex-direction: column;
     align-items: center;
     padding: 1.5rem;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border: 2px solid #0ea5e9;
+    background: #f3f4f6; /* dezenter grauer Hintergrund */
+    border: 1.5px solid #d1d5db; /* dezente graue Umrandung */
     border-radius: 12px;
-    transition: all 0.3s ease;
+    transition: none;
+    cursor: default; /* Cursor zeigt Nicht-Interaktivität */
+    opacity: 1;
+    box-shadow: none;
+    position: relative;
   }
 
   .bundesland-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.15);
+    transform: none;
+    box-shadow: none;
   }
 
   .bundesland-placeholder {
@@ -470,6 +474,13 @@
     font-size: 1rem;
     font-weight: 600;
     color: #1f2937;
+    text-align: center;
+  }
+
+  .bundesland-hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
     text-align: center;
   }
 
