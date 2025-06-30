@@ -477,13 +477,6 @@
     text-align: center;
   }
 
-  .bundesland-hint {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-    text-align: center;
-  }
-
   .bundesland-placeholder .bundesland-name {
     color: #6b7280;
   }
