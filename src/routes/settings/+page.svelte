@@ -49,10 +49,12 @@
       });
 
       // Update preferences
-      await userProfileService.updateUserPreferences($user.uid, {
-        language,
-        theme,
-        notifications,
+      await userProfileService.updateUserProfile($user.uid, {
+        preferences: {
+          language,
+          theme,
+          notifications,
+        }
       });
       successMessage = "Profil erfolgreich aktualisiert!";
       setTimeout(() => (successMessage = ""), 3000);
