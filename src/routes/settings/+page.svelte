@@ -217,7 +217,7 @@
             <div class="edit-buttons">
               <button
                 type="button"
-                on:click={() => goto("/complete-profile/guided?edit=true")}
+                on:click={() => goto("/complete-profile?edit=true")}
                 class="btn profile-edit guided"
               >
                 <div class="btn-content">
