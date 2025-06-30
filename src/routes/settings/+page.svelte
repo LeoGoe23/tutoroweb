@@ -107,104 +107,120 @@
         <div class="school-info-grid">
           <div class="school-info-left">
             <div class="info-group">
-              <span class="info-label">Jahrgangsstufe</span>
+              <label class="info-label" for="jahrgangsstufe">Jahrgangsstufe</label>
               <div class="info-value compact">
-                {#if jahrgangsstufe === "Studium"}
-                  Studium
-                {:else if jahrgangsstufe === "Erwachsenenbildung"}
-                  Erwachsenenbildung
-                {:else if jahrgangsstufe}
-                  {jahrgangsstufe}. Klasse
-                {:else}
-                  Nicht angegeben
-                {/if}
+                <select id="jahrgangsstufe" bind:value={jahrgangsstufe} disabled={isSubmitting}>
+                  <option value="">Nicht angegeben</option>
+                  <option value="5">5. Klasse</option>
+                  <option value="6">6. Klasse</option>
+                  <option value="7">7. Klasse</option>
+                  <option value="8">8. Klasse</option>
+                  <option value="9">9. Klasse</option>
+                  <option value="10">10. Klasse</option>
+                  <option value="11">11. Klasse</option>
+                  <option value="12">12. Klasse</option>
+                  <option value="13">13. Klasse</option>
+                  <option value="Studium">Studium</option>
+                  <option value="Erwachsenenbildung">Erwachsenenbildung</option>
+                </select>
               </div>
             </div>
 
             <div class="info-group">
-              <span class="info-label">Art der Schule</span>
+              <label class="info-label" for="schulArt">Art der Schule</label>
               <div class="info-value compact">
-                {schulArt || "Nicht angegeben"}
+                <select id="schulArt" bind:value={schulArt} disabled={isSubmitting}>
+                  <option value="">Nicht angegeben</option>
+                  <option value="Grundschule">Grundschule</option>
+                  <option value="Hauptschule">Hauptschule</option>
+                  <option value="Realschule">Realschule</option>
+                  <option value="Gesamtschule">Gesamtschule</option>
+                  <option value="Gymnasium">Gymnasium</option>
+                  <option value="Berufsschule">Berufsschule</option>
+                  <option value="Berufsoberschule">Berufsoberschule</option>
+                  <option value="Fachoberschule">Fachoberschule</option>
+                  <option value="Fachhochschule">Fachhochschule</option>
+                  <option value="Universität">Universität</option>
+                  <option value="Privatschule">Privatschule</option>
+                  <option value="Waldorfschule">Waldorfschule</option>
+                  <option value="Montessori-Schule">Montessori-Schule</option>
+                  <option value="Internationale Schule">Internationale Schule</option>
+                  <option value="Sonstiges">Sonstiges</option>
+                </select>
               </div>
             </div>
           </div>
 
           <div class="school-info-right">
             <div class="info-group">
-              <span class="info-label">Bundesland</span>
-              <div class="info-value bundesland-display">
+              <label class="info-label" for="bundesland">Bundesland</label>
+              <div class="info-value bundesland-display" style="display: flex; align-items: center; gap: 1rem;">
                 {#if bundesland}
-                  <div class="bundesland-card">
-                    <div class="bundesland-flag">
-                      {#if bundesland === "Baden-Württemberg"}
-                        <img src="/countries/german_counties/baden-wuerttemberg.svg" alt="Baden-Württemberg Flagge" />
-                      {:else if bundesland === "Bayern"}
-                        <img src="/countries/german_counties/bayern.svg" alt="Bayern Flagge" />
-                      {:else if bundesland === "Berlin"}
-                        <img src="/countries/german_counties/berlin.svg" alt="Berlin Flagge" />
-                      {:else if bundesland === "Brandenburg"}
-                        <img src="/countries/german_counties/brandenburg.svg" alt="Brandenburg Flagge" />
-                      {:else if bundesland === "Bremen"}
-                        <img src="/countries/german_counties/bremen.svg" alt="Bremen Flagge" />
-                      {:else if bundesland === "Hamburg"}
-                        <img src="/countries/german_counties/hamburg.svg" alt="Hamburg Flagge" />
-                      {:else if bundesland === "Hessen"}
-                        <img src="/countries/german_counties/hessen.svg" alt="Hessen Flagge" />
-                      {:else if bundesland === "Mecklenburg-Vorpommern"}
-                        <img
-                          src="/countries/german_counties/mecklenburg-vorpommern.svg"
-                          alt="Mecklenburg-Vorpommern Flagge"
-                        />
-                      {:else if bundesland === "Niedersachsen"}
-                        <img src="/countries/german_counties/niedersachsen.svg" alt="Niedersachsen Flagge" />
-                      {:else if bundesland === "Nordrhein-Westfalen"}
-                        <img
-                          src="/countries/german_counties/nordrhein-westfalen.svg"
-                          alt="Nordrhein-Westfalen Flagge"
-                        />
-                      {:else if bundesland === "Rheinland-Pfalz"}
-                        <img src="/countries/german_counties/rheinland-pfalz.svg" alt="Rheinland-Pfalz Flagge" />
-                      {:else if bundesland === "Saarland"}
-                        <img src="/countries/german_counties/saarland.svg" alt="Saarland Flagge" />
-                      {:else if bundesland === "Sachsen"}
-                        <img src="/countries/german_counties/sachsen.svg" alt="Sachsen Flagge" />
-                      {:else if bundesland === "Sachsen-Anhalt"}
-                        <img src="/countries/german_counties/sachsen-anhalt.svg" alt="Sachsen-Anhalt Flagge" />
-                      {:else if bundesland === "Schleswig-Holstein"}
-                        <img src="/countries/german_counties/schleswig-holstein.svg" alt="Schleswig-Holstein Flagge" />
-                      {:else if bundesland === "Thüringen"}
-                        <img src="/countries/german_counties/thueringen.svg" alt="Thüringen Flagge" />
-                      {:else}
-                        🇩🇪
-                      {/if}
-                    </div>
-                    <div class="bundesland-name">
-                      {bundesland}
-                    </div>
-                  </div>
-                {:else}
-                  <div class="bundesland-placeholder">
-                    <div class="bundesland-flag">🇩🇪</div>
-                    <div class="bundesland-name">Nicht angegeben</div>
-                  </div>
+                  <img
+                    src={
+                      "/countries/german_counties/" +
+                      bundesland
+                        .toLowerCase()
+                        .replaceAll('ü', 'ue')
+                        .replaceAll('ä', 'ae')
+                        .replaceAll('ö', 'oe')
+                        .replaceAll(' ', '-') + ".svg"
+                    }
+                    alt={bundesland + " Flagge"}
+                    style="width: 40px; height: 32px; object-fit: contain; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.10);"
+                  />
                 {/if}
+                <select id="bundesland" bind:value={bundesland} disabled={isSubmitting} style="min-width: 220px;">
+                  <option value="">Nicht angegeben</option>
+                  <option value="Baden-Württemberg">Baden-Württemberg</option>
+                  <option value="Bayern">Bayern</option>
+                  <option value="Berlin">Berlin</option>
+                  <option value="Brandenburg">Brandenburg</option>
+                  <option value="Bremen">Bremen</option>
+                  <option value="Hamburg">Hamburg</option>
+                  <option value="Hessen">Hessen</option>
+                  <option value="Mecklenburg-Vorpommern">Mecklenburg-Vorpommern</option>
+                  <option value="Niedersachsen">Niedersachsen</option>
+                  <option value="Nordrhein-Westfalen">Nordrhein-Westfalen</option>
+                  <option value="Rheinland-Pfalz">Rheinland-Pfalz</option>
+                  <option value="Saarland">Saarland</option>
+                  <option value="Sachsen">Sachsen</option>
+                  <option value="Sachsen-Anhalt">Sachsen-Anhalt</option>
+                  <option value="Schleswig-Holstein">Schleswig-Holstein</option>
+                  <option value="Thüringen">Thüringen</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
 
         <div class="info-group">
-          <span class="info-label">Interessensfächer</span>
+          <label class="info-label" for="interessensfaecher-input">Interessensfächer</label>
           <div class="info-value">
-            {#if kursFach && kursFach.length > 0}
+            <input type="hidden" id="interessensfaecher-input" name="interessensfaecher-input" value={kursFach.join(',')} />
+            <div class="subject-tags-group" role="group" aria-labelledby="interessensfaecher-input">
               <div class="subject-tags">
-                {#each kursFach as fach}
-                  <span class="subject-tag">{fach}</span>
+                {#each [
+                  "Deutsch", "Englisch", "Französisch", "Spanisch", "Latein",
+                  "Mathematik", "Physik", "Chemie", "Biologie", "Informatik",
+                  "Geschichte", "Erdkunde", "Politik", "Wirtschaft", "Religion", "Ethik", "Philosophie",
+                  "Kunst", "Musik", "Sport", "Psychologie", "Pädagogik", "Sonstiges"
+                ] as fach}
+                  {@const fachasFach = fach as KursFach}
+                  <span
+                    class="subject-tag selectable {kursFach.includes(fachasFach) ? 'selected' : ''}"
+                    role="button"
+                    tabindex="0"
+                    aria-pressed={kursFach.includes(fachasFach)}
+                    on:click={() => kursFach = kursFach.includes(fachasFach) ? kursFach.filter(f => f !== fachasFach) : [...kursFach, fachasFach]}
+                    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { kursFach = kursFach.includes(fachasFach) ? kursFach.filter(f => f !== fachasFach) : [...kursFach, fachasFach]; e.preventDefault(); } }}
+                  >{fach}</span>
                 {/each}
               </div>
-            {:else}
-              Keine Fächer ausgewählt
-            {/if}
+              {#if kursFach.length === 0}
+                <div style="color:#dc2626; font-size:0.95rem; margin-top:0.5rem;">Keine Fächer ausgewählt</div>
+              {/if}
+            </div>
           </div>
         </div>
         <div class="profile-completion-action">
@@ -327,8 +343,7 @@
     font-size: 0.9rem;
   }
 
-  .form-group input,
-  .form-group select {
+  .form-group input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #d1d5db;
@@ -337,8 +352,7 @@
     transition: border-color 0.2s;
   }
 
-  .form-group input:focus,
-  .form-group select:focus {
+  .form-group input:focus {
     outline: none;
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
@@ -408,69 +422,6 @@
     padding: 0;
     background: transparent;
     border: none;
-  }
-
-  .bundesland-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem;
-    background: #f3f4f6; /* dezenter grauer Hintergrund */
-    border: 1.5px solid #d1d5db; /* dezente graue Umrandung */
-    border-radius: 12px;
-    transition: none;
-    cursor: default; /* Cursor zeigt Nicht-Interaktivität */
-    opacity: 1;
-    box-shadow: none;
-    position: relative;
-  }
-
-  .bundesland-card:hover {
-    transform: none;
-    box-shadow: none;
-  }
-
-  .bundesland-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    opacity: 0.7;
-  }
-
-  .bundesland-flag {
-    margin-bottom: 0.5rem;
-    line-height: 1;
-    width: 100px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .bundesland-flag img {
-    max-width: 100px;
-    max-height: 80px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
-  }
-
-  .bundesland-name {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    text-align: center;
-  }
-
-  .bundesland-placeholder .bundesland-name {
-    color: #6b7280;
   }
 
   .subject-tags {
@@ -673,9 +624,41 @@
   .btn.secondary:hover {
     background: #e5e7eb;
   }
-  .btn:disabled {
-    opacity: 0.6;
+  /* Verbesserte Dropdown-Styles für alle Selects */
+  .form-group select,
+  .info-value select {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f9fafb url('data:image/svg+xml;utf8,<svg fill="%236b7280" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>') no-repeat right 0.75rem center/1.25rem 1.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    color: #374151;
+    min-width: 180px;
+    max-width: 100%;
+  }
+  .form-group select:focus,
+  .info-value select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    background-color: #fff;
+  }
+  .form-group select:disabled,
+  .info-value select:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
     cursor: not-allowed;
+    opacity: 0.8;
+  }
+  /* Dropdown Arrow für dunklen Hintergrund besser sichtbar */
+  .info-value select {
+    background-color: #f9fafb;
   }
   @media (max-width: 640px) {
     .form-row {

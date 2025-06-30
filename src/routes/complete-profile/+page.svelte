@@ -4,6 +4,7 @@
   import { page } from "$app/stores";
   import { user, userProfile } from "$lib/auth";
   import { userProfileService } from "$lib/userProfile";
+  import { BUNDESLAENDER, JAHRGANGSSTUFEN, SCHULARTEN, SUBJECT_CATEGORIES } from "$lib/schoolData";
   import type { Jahrgangsstufe, Bundesland, KursFach, SchulArt } from "$lib/types";
 
   // Step management
@@ -132,15 +133,6 @@
       isSubmitting = false;
     }
   }
-
-  // Subject categories for better organization
-  const subjectCategories = {
-    Sprachen: ["Deutsch", "Englisch", "Französisch", "Spanisch", "Latein"],
-    MINT: ["Mathematik", "Physik", "Chemie", "Biologie", "Informatik"],
-    Gesellschaft: ["Geschichte", "Erdkunde", "Politik", "Wirtschaft", "Religion", "Ethik", "Philosophie"],
-    "Kreativ & Sport": ["Kunst", "Musik", "Sport"],
-    Weitere: ["Psychologie", "Pädagogik", "Sonstiges"],
-  };
 </script>
 
 <svelte:head>
@@ -234,17 +226,9 @@
               <label for="jahrgangsstufe">Jahrgangsstufe *</label>
               <select id="jahrgangsstufe" bind:value={jahrgangsstufe} class="form-select" required>
                 <option value="">Wähle deine Jahrgangsstufe</option>
-                <option value="5">5. Klasse</option>
-                <option value="6">6. Klasse</option>
-                <option value="7">7. Klasse</option>
-                <option value="8">8. Klasse</option>
-                <option value="9">9. Klasse</option>
-                <option value="10">10. Klasse</option>
-                <option value="11">11. Klasse</option>
-                <option value="12">12. Klasse</option>
-                <option value="13">13. Klasse</option>
-                <option value="Studium">Studium</option>
-                <option value="Erwachsenenbildung">Erwachsenenbildung</option>
+                {#each JAHRGANGSSTUFEN as stufe}
+                  <option value={stufe}>{stufe === 'Studium' || stufe === 'Erwachsenenbildung' ? stufe : `${stufe}. Klasse`}</option>
+                {/each}
               </select>
             </div>
 
@@ -252,21 +236,9 @@
               <label for="schulArt">Schulart *</label>
               <select id="schulArt" bind:value={schulArt} class="form-select" required>
                 <option value="">Wähle deine Schulart</option>
-                <option value="Grundschule">Grundschule</option>
-                <option value="Hauptschule">Hauptschule</option>
-                <option value="Realschule">Realschule</option>
-                <option value="Gesamtschule">Gesamtschule</option>
-                <option value="Gymnasium">Gymnasium</option>
-                <option value="Berufsschule">Berufsschule</option>
-                <option value="Berufsoberschule">Berufsoberschule</option>
-                <option value="Fachoberschule">Fachoberschule</option>
-                <option value="Fachhochschule">Fachhochschule</option>
-                <option value="Universität">Universität</option>
-                <option value="Privatschule">Privatschule</option>
-                <option value="Waldorfschule">Waldorfschule</option>
-                <option value="Montessori-Schule">Montessori-Schule</option>
-                <option value="Internationale Schule">Internationale Schule</option>
-                <option value="Sonstiges">Sonstiges</option>
+                {#each SCHULARTEN as art}
+                  <option value={art}>{art}</option>
+                {/each}
               </select>
             </div>
           </div>
@@ -278,7 +250,7 @@
 
           <div class="form-content">
             <div class="bundesland-grid">
-              {#each ["Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern", "Niedersachsen", "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen", "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen"] as land}
+              {#each BUNDESLAENDER as land}
                 <button
                   type="button"
                   class="bundesland-option"
@@ -308,7 +280,7 @@
 
           <div class="form-content">
             <div class="subjects-container">
-              {#each Object.entries(subjectCategories) as [category, subjects]}
+              {#each Object.entries(SUBJECT_CATEGORIES) as [category, subjects]}
                 <div class="subject-category">
                   <h3 class="category-title">{category}</h3>
                   <div class="subject-chips">
